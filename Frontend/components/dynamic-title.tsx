@@ -33,6 +33,15 @@ export default function DynamicTitle() {
       
       // Update document title
       document.title = title
+      
+      // Update favicon if logo exists
+      if (settings.logo) {
+        const linkElement = document.querySelector("link[rel*='icon']") as HTMLLinkElement || document.createElement('link');
+        linkElement.type = 'image/x-icon';
+        linkElement.rel = 'shortcut icon';
+        linkElement.href = settings.logo;
+        document.getElementsByTagName('head')[0].appendChild(linkElement);
+      }
     }
   }, [settings, pathname])
 

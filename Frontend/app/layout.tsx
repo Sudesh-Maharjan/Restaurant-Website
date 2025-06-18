@@ -13,7 +13,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Restaurant - Delicious Food and Experience",
   description: "Experience delicious cuisine in the heart of the city",
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  icons: {
+    icon: '/placeholder-logo.svg',
+  }
 }
 
 export default function RootLayout({

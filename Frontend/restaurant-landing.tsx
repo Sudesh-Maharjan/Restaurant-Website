@@ -54,7 +54,7 @@ export default function RestaurantLanding() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="text-white border-white hover:bg-white hover:text-black text-lg px-8 py-3"
+                  className="text-black border-white hover:bg-gray-200 hover:text-black text-lg px-8 py-3"
                 >
                   Make Reservation
                 </Button>
