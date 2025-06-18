@@ -13,7 +13,7 @@ export default function AdminDashboard() {
   const dispatch = useAppDispatch()
   const { orders, isLoading: ordersLoading } = useAppSelector((state) => state.orders)
   const { customers, isLoading: customersLoading } = useAppSelector((state) => state.customers)
-  const { products } = useAppSelector((state) => state.products)
+  const { products } = useAppSelector((state) => state.product) // Change state.products to state.product
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -50,7 +50,8 @@ export default function AdminDashboard() {
   
   orders.forEach(order => {
     order.items.forEach(item => {
-      const itemName = item.name || products.find(p => p._id === item.product)?.name || 'Unknown Product'
+      const productItem = products.find(p => p._id === item.product)
+      const itemName = item.name || (productItem ? productItem.name : 'Unknown Product')
       itemCounts[itemName] = (itemCounts[itemName] || 0) + (item.quantity || 1)
     })
   })

@@ -29,6 +29,10 @@ export const getProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(API_URL);
+      // Ensure we have a valid response with data
+      if (!response.data || !response.data.data) {
+        return { data: [] };
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch products');
@@ -58,14 +62,15 @@ const productsSlice = createSlice({
     builder.addCase(getProducts.pending, (state) => {
       state.isLoading = true;
       state.error = null;
-    });
-    builder.addCase(getProducts.fulfilled, (state, action) => {
+    });    builder.addCase(getProducts.fulfilled, (state, action) => {
       state.isLoading = false;
-      state.products = action.payload.data;
+      state.products = action.payload?.data || [];
       // Get only available products for featured (max 6)
-      state.featured = action.payload.data
-        .filter((product: Product) => product.available)
-        .slice(0, 6);
+      state.featured = Array.isArray(action.payload?.data) 
+        ? action.payload.data
+            .filter((product: Product) => product && product.available)
+            .slice(0, 6)
+        : [];
       state.error = null;
     });
     builder.addCase(getProducts.rejected, (state, action) => {

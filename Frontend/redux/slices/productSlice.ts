@@ -29,6 +29,10 @@ export const getProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get(API_URL);
+      // Ensure we have a valid response with data
+      if (!response.data || !response.data.data) {
+        return [];
+      }
       return response.data.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch products');
@@ -113,7 +117,8 @@ const productSlice = createSlice({
       })
       .addCase(getProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.products = action.payload;
+        // Ensure products is always an array even if the API returns undefined or null
+        state.products = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(getProducts.rejected, (state, action) => {
         state.isLoading = false;

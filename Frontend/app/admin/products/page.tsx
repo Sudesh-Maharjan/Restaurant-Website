@@ -37,7 +37,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function AdminProducts() {
   const dispatch = useAppDispatch()
-  const { products, isLoading, error } = useAppSelector((state) => state.products)
+  const { products, isLoading, error } = useAppSelector((state) => state.product)
   const { toast } = useToast()
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -59,11 +59,13 @@ export default function AdminProducts() {
     }
   }, [error, toast])
 
-  const filteredProducts = products.filter(
-    (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredProducts = Array.isArray(products) 
+    ? products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : []
 
   const handleAddProduct = () => {
     setEditingProduct({
@@ -330,67 +332,67 @@ export default function AdminProducts() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProducts.map((product) => (
-                  <TableRow key={product._id}>
-                    <TableCell>
-                      <div className="relative h-12 w-12 rounded overflow-hidden">
-                        <Image
-                          src={product.image || "/placeholder.svg"}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          product.available ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {product.available ? "Available" : "Unavailable"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                {filteredProducts.length > 0 ? (
+                  filteredProducts.map((product) => (
+                    <TableRow key={product._id}>
+                      <TableCell>
+                        <div className="relative h-12 w-12 rounded overflow-hidden">
+                          <Image
+                            src={product.image || "/placeholder.svg"}
+                            alt={product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{product.name}</TableCell>
+                      <TableCell>{product.category}</TableCell>
+                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            product.available ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {product.available ? "Available" : "Unavailable"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end space-x-2">
+                          <Button variant="outline" size="sm" onClick={() => handleEditProduct(product)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
 
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the product "{product.name}"
-                                from your menu.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-red-600 hover:bg-red-700"
-                                onClick={() => handleDeleteProduct(product._id)}
-                              >
-                                Delete Product
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-                {filteredProducts.length === 0 && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  This action cannot be undone. This will permanently delete the product "{product.name}"
+                                  from your menu.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  className="bg-red-600 hover:bg-red-700"
+                                  onClick={() => handleDeleteProduct(product._id)}
+                                >
+                                  Delete Product
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-gray-500">
                       No products found. Try a different search term or add a new product.
