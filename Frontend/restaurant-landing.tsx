@@ -25,12 +25,11 @@ export default function RestaurantLanding() {
     <div className="flex flex-col min-h-screen">
       <Header />
 
-      <main className="flex-1">
-        {/* Hero Section */}
+      <main className="flex-1">        {/* Hero Section */}
         <section id="home" className="relative h-[90vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 bg-black/40 z-10" />
           <Image
-            src="/placeholder.svg?height=800&width=1200"
+            src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop"
             alt="Restaurant interior"
             fill
             className="object-cover"
@@ -38,7 +37,7 @@ export default function RestaurantLanding() {
           />
           <div className="relative z-20 text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-5xl md:text-7xl font-bold mb-6">
-              Authentic Italian
+              {settings?.restaurantName || "Authentic Italian"}
               <span className="block text-orange-400">Dining Experience</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">
@@ -66,12 +65,10 @@ export default function RestaurantLanding() {
         {/* About Section */}
         <section id="about" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div>
+            <div className="grid lg:grid-cols-2 gap-12 items-center">              <div>
                 <h2 className="text-4xl font-bold mb-6">Our Story</h2>
                 <p className="text-lg text-gray-600 mb-6">
-                  For over 30 years, Bella Vista has been serving authentic Italian cuisine in the heart of the city.
-                  Our family recipes, passed down through generations, bring the true taste of Italy to your table.
+                  {settings?.aboutUs || "For over 30 years, we have been serving authentic Italian cuisine in the heart of the city. Our family recipes, passed down through generations, bring the true taste of Italy to your table."}
                 </p>
                 <p className="text-lg text-gray-600 mb-8">
                   From our wood-fired pizzas to our handmade pasta, every dish is prepared with love, using only the
@@ -97,7 +94,7 @@ export default function RestaurantLanding() {
               </div>
               <div className="relative">
                 <Image
-                  src="/placeholder.svg?height=600&width=500"
+                  src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=2070&auto=format&fit=crop"
                   alt="Chef preparing food"
                   width={500}
                   height={600}
@@ -163,10 +160,14 @@ export default function RestaurantLanding() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="bg-gray-300 rounded-lg h-96 flex items-center justify-center">
-                <p className="text-gray-600">Interactive Map Placeholder</p>
+              </div>              <div className="bg-gray-300 rounded-lg h-96 flex items-center justify-center overflow-hidden">
+                <Image 
+                  src="https://maps.googleapis.com/maps/api/staticmap?center=New+York,NY&zoom=13&size=600x400&maptype=roadmap&markers=color:red%7Clabel:R%7CNew+York,NY&key=YOUR_API_KEY"
+                  alt="Restaurant location map"
+                  width={800}
+                  height={400}
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>

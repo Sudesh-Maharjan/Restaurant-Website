@@ -64,9 +64,10 @@ export function MenuItemCard({
 
   return (
     <Card className={`overflow-hidden hover:shadow-lg transition-shadow group ${!isAvailable ? "opacity-60" : ""}`}>
-      <div className="relative h-48">
-        <Image
-          src={image || "/placeholder.svg"}
+      <div className="relative h-48">        <Image
+          src={image && !image.includes("placeholder") 
+            ? image 
+            : "https://images.unsplash.com/photo-1546549032-9571cd6b27df?q=80&w=1887&auto=format&fit=crop"}
           alt={name}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-300"
