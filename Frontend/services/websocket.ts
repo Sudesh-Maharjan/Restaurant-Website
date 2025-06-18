@@ -30,9 +30,7 @@ class WebSocketService {
     this.socket.onmessage = this.onMessage.bind(this);
     this.socket.onclose = this.onClose.bind(this);
     this.socket.onerror = this.onError.bind(this);
-  }
-
-  onOpen() {
+  }  onOpen() {
     console.log('WebSocket connection established');
     this.isConnected = true;
     this.reconnectAttempts = 0;
@@ -43,6 +41,12 @@ class WebSocketService {
       clientType: this.clientType,
       userId: this.userId
     });
+    
+    // Dispatch custom event that WebSocket is connected
+    if (typeof window !== 'undefined') {
+      const customEvent = new CustomEvent('wsConnected', { detail: { connected: true } });
+      window.dispatchEvent(customEvent);
+    }
   }
 
   onMessage(event: MessageEvent) {
@@ -141,12 +145,22 @@ class WebSocketService {
   onError(error: Event) {
     console.error('WebSocket error:', error);
   }
-
   sendMessage(message: any) {
-    if (this.socket && this.isConnected) {
-      this.socket.send(JSON.stringify(message));
+    if (this.socket) {
+      // Check if socket is in OPEN state (WebSocket.OPEN = 1)
+      if (this.socket.readyState === 1) {
+        this.socket.send(JSON.stringify(message));
+      } else if (this.socket.readyState === 0) {
+        // If still connecting, queue the message to be sent once connected
+        console.log('Socket still connecting, queueing message for later');
+        setTimeout(() => {
+          this.sendMessage(message);
+        }, 1000); // Try again after 1 second
+      } else {
+        console.error(`Cannot send message: WebSocket readyState is ${this.socket.readyState}`);
+      }
     } else {
-      console.error('Cannot send message: WebSocket is not connected');
+      console.error('Cannot send message: WebSocket is not initialized');
     }
   }
 

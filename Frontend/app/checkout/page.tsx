@@ -75,12 +75,20 @@ export default function CheckoutPage() {
       [name]: value,
     })
   }
-
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+      // Validate form based on order type and payment method
+    if (!formData.phone) {
+      toast({
+        title: "Missing Information",
+        description: "Please provide a phone number",
+        variant: "destructive"
+      })
+      setIsSubmitting(false)
+      return
+    }
     
-    // Validate form based on order type and payment method
     if (orderType === "delivery" && (!formData.address || !formData.city || !formData.state || !formData.zipCode)) {
       toast({
         title: "Missing Information",
@@ -113,44 +121,45 @@ export default function CheckoutPage() {
           phone: formData.phone,
           address: formData.address || "",
         }
-        
-        const customerResult = await dispatch(createCustomer(customerData)).unwrap()
+          const customerResult = await dispatch(createCustomer(customerData)).unwrap()
         customerId = customerResult._id
       }
-
+      
       // Create order
       const orderData = {
         customer: customerId,
         items: cartState.items.map((item) => ({
-          id: item.id,
+          product: item.id,
           name: item.name,
           price: item.price,
           quantity: item.quantity,
           image: item.image,
         })),
-        totalAmount: finalTotal,
+        total: finalTotal,
         status: "pending",
-        shippingInfo: {
-          address: formData.address || "Pickup in store",
-          city: formData.city || "",
-          postalCode: formData.zipCode || "",
-          country: "USA",
-        },
+        address: formData.address || "Pickup in store",
+        phone: formData.phone, // Make sure this is included
+        email: formData.email,
+        notes: formData.deliveryInstructions || "",
         paymentMethod: paymentMethod,
+        paid: paymentMethod === "card" // Mark as paid if using card
       }
-
-      await dispatch(createOrder(orderData)).unwrap()
+        await dispatch(createOrder(orderData)).unwrap()
       
       // Clear cart
       dispatch(clearCart())
 
-      // Show success message and redirect
+      // Show success message with delay before redirect
       toast({
-        title: "Order Placed",
-        description: "Your order has been placed successfully! You will receive a confirmation email shortly.",
+        title: "Order Placed Successfully!",
+        description: "Your order has been sent to the restaurant. You'll receive updates on your order status.",
+        variant: "default"
       })
       
-      router.push("/")
+      // Give the user time to see the success message before redirecting
+      setTimeout(() => {
+        router.push("/")
+      }, 2000)
     } catch (error: any) {
       toast({
         title: "Error",

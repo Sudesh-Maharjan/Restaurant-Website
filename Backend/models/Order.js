@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
+  orderNumber: {
+    type: Number,
+    unique: true,
+  },
   customer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Customer',
@@ -73,9 +77,22 @@ const OrderSchema = new mongoose.Schema({
   },
 });
 
-// Update the updatedAt field before saving
-OrderSchema.pre('save', function(next) {
+// Update the updatedAt field before saving and assign orderNumber if not already set
+OrderSchema.pre('save', async function(next) {
   this.updatedAt = Date.now();
+  
+  // If orderNumber is not set, generate a new one
+  if (!this.orderNumber) {
+    try {
+      // Find the highest order number and increment by 1
+      const highestOrder = await this.constructor.findOne({}, { orderNumber: 1 }, { sort: { orderNumber: -1 } });
+      this.orderNumber = highestOrder && highestOrder.orderNumber ? highestOrder.orderNumber + 1 : 1;
+    } catch (error) {
+      console.error('Error generating order number:', error);
+      return next(error);
+    }
+  }
+  
   next();
 });
 

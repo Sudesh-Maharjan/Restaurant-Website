@@ -12,7 +12,6 @@ interface WebSocketProviderProps {
 export default function WebSocketProvider({ children }: WebSocketProviderProps) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -28,7 +27,14 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
       }
     };
 
+    // Setup event listener for WebSocket connection status
+    const handleWsConnection = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.log('WebSocket connection status:', customEvent.detail.connected);
+    };
+
     window.addEventListener('orderUpdate', handleOrderUpdate);
+    window.addEventListener('wsConnected', handleWsConnection);
 
     // Connect to WebSocket if user is logged in
     if (user) {
@@ -39,6 +45,7 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
     // Cleanup on unmount
     return () => {
       window.removeEventListener('orderUpdate', handleOrderUpdate);
+      window.removeEventListener('wsConnected', handleWsConnection);
       webSocketService?.disconnect();
     };
   }, [dispatch, user]);
