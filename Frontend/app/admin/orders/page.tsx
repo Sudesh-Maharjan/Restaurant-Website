@@ -73,13 +73,12 @@ export default function AdminOrders() {
 
     return matchesSearch && matchesStatus
   })
-
   const handleViewOrder = (order: Order) => {
     setSelectedOrder(order)
     setIsDialogOpen(true)
   }
 
-  const updateOrderStatus = (orderId: string, status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled') => {
+  const handleUpdateOrderStatus = (orderId: string, status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled') => {
     dispatch(updateOrderStatus({ 
       id: orderId, 
       status
@@ -397,12 +396,11 @@ export default function AdminOrders() {
                       {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
                     </Badge>
 
-                    <div className="grid grid-cols-2 gap-2">
-                      {selectedOrder.status === "pending" && (
+                    <div className="grid grid-cols-2 gap-2">                      {selectedOrder.status === "pending" && (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => updateOrderStatus(selectedOrder._id, "preparing")}
+                          onClick={() => handleUpdateOrderStatus(selectedOrder._id, "preparing")}
                         >
                           Mark as Preparing
                         </Button>
@@ -411,7 +409,7 @@ export default function AdminOrders() {
                         <Button
                           className="bg-green-600 hover:bg-green-700"
                           size="sm"
-                          onClick={() => updateOrderStatus(selectedOrder._id, "ready")}
+                          onClick={() => handleUpdateOrderStatus(selectedOrder._id, "ready")}
                         >
                           Mark as Ready
                         </Button>
@@ -420,7 +418,7 @@ export default function AdminOrders() {
                         <Button
                           className="bg-green-600 hover:bg-green-700"
                           size="sm"
-                          onClick={() => updateOrderStatus(selectedOrder._id, "delivered")}
+                          onClick={() => handleUpdateOrderStatus(selectedOrder._id, "delivered")}
                         >
                           Mark as Delivered
                         </Button>
@@ -429,7 +427,7 @@ export default function AdminOrders() {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => updateOrderStatus(selectedOrder._id, "cancelled")}
+                          onClick={() => handleUpdateOrderStatus(selectedOrder._id, "cancelled")}
                         >
                           Cancel Order
                         </Button>

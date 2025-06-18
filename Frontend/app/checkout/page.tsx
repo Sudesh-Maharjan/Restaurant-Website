@@ -138,8 +138,7 @@ export default function CheckoutPage() {
         total: finalTotal,
         status: "pending",
         address: formData.address || "Pickup in store",
-        phone: formData.phone, // Make sure this is included
-        email: formData.email,
+        phone: formData.phone, // Make sure this is included        email: formData.email,
         notes: formData.deliveryInstructions || "",
         paymentMethod: paymentMethod,
         paid: paymentMethod === "card" // Mark as paid if using card
@@ -156,10 +155,30 @@ export default function CheckoutPage() {
         variant: "default"
       })
       
+      // Play notification sound
+      try {
+        const audio = new Audio('/notification.mp3');
+        audio.volume = 0.7; // Reduce volume slightly
+        audio.play().catch(err => console.error('Error playing notification sound:', err));
+      } catch (err) {
+        console.error('Error playing notification sound:', err);
+      }
+      
+      // Trigger a custom order placed event (as a backup in case WebSocket fails)
+      if (typeof window !== 'undefined') {
+        const customEvent = new CustomEvent('orderPlaced', { 
+          detail: { 
+            order: orderData,
+            timestamp: new Date().toISOString()
+          } 
+        });
+        window.dispatchEvent(customEvent);
+      }
+      
       // Give the user time to see the success message before redirecting
       setTimeout(() => {
         router.push("/")
-      }, 2000)
+      }, 3000)
     } catch (error: any) {
       toast({
         title: "Error",

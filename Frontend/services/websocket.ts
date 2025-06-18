@@ -61,67 +61,24 @@ class WebSocketService {
     } catch (error) {
       console.error('Error parsing WebSocket message:', error);
     }
-  }
-  handleOrderEvent(data: any) {
+  }  handleOrderEvent(data: any) {
     // Play notification sound
     if (this.notificationSound) {
-      if (data.sound) {
-        this.notificationSound.src = `data:audio/mp3;base64,${data.sound}`;
+      try {
+        if (data.sound) {
+          this.notificationSound.src = `data:audio/mp3;base64,${data.sound}`;
+        }
+        this.notificationSound.play().catch(err => console.error('Error playing notification sound:', err));
+      } catch (err) {
+        console.error('Error playing notification sound:', err);
       }
-      this.notificationSound.play().catch(err => console.error('Error playing notification sound:', err));
-    }
-    
-    // Handle different order events
-    switch (data.event) {
-      case 'created':
-        if (this.clientType === 'admin') {
-          toast({
-            title: 'New Order Received',
-            description: `Order #${data.order._id.substr(-6)} has been placed`,
-            variant: 'default',
-          });
-        } else {
-          toast({
-            title: 'Order Placed',
-            description: 'Your order has been received by the restaurant',
-            variant: 'default',
-          });
-        }
-        break;
-        
-      case 'statusUpdated':
-        const statusMessages: Record<string, string> = {
-          pending: 'Your order has been received',
-          preparing: 'Your order is being prepared',
-          ready: 'Your order is ready for pickup/delivery',
-          delivered: 'Your order has been delivered',
-          cancelled: 'Your order has been cancelled'
-        };
-        
-        if (this.clientType === 'customer') {
-          toast({
-            title: 'Order Status Updated',
-            description: statusMessages[data.order.status as string] || `Status: ${data.order.status}`,
-            variant: 'default',
-          });
-        }
-        break;
-        
-      case 'paymentUpdated':
-        if (this.clientType === 'customer') {
-          toast({
-            title: 'Payment Status Updated',
-            description: data.order.paid ? 'Your payment has been confirmed' : 'Payment status updated',
-            variant: 'default',
-          });
-        }
-        break;
     }
     
     // Dispatch custom event for components to listen to
     if (typeof window !== 'undefined') {
       const customEvent = new CustomEvent('orderUpdate', { detail: data });
       window.dispatchEvent(customEvent);
+      console.log('Dispatched orderUpdate event:', data);
     }
   }
 
@@ -139,11 +96,32 @@ class WebSocketService {
       }, this.reconnectTimeout);
     } else {
       console.error('Max reconnect attempts reached. WebSocket connection closed.');
-    }
-  }
+    }  }
 
   onError(error: Event) {
     console.error('WebSocket error:', error);
+    
+    // If we have a window object, dispatch an error event
+    if (typeof window !== 'undefined') {
+      const customEvent = new CustomEvent('wsError', { 
+        detail: { 
+          error: 'Connection error',
+          timestamp: new Date().toISOString()
+        } 
+      });
+      window.dispatchEvent(customEvent);
+    }
+    
+    // Try to reconnect if possible
+    this.isConnected = false;
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Attempting to reconnect after error (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      
+      setTimeout(() => {
+        this.connect(this.clientType, this.userId);
+      }, this.reconnectTimeout);
+    }
   }
   sendMessage(message: any) {
     if (this.socket) {

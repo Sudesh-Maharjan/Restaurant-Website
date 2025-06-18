@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { useCart } from "../contexts/cart-context"
-import { useAppSelector } from "@/redux/hooks"
+import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import { addToCart } from "@/redux/slices/cartSlice"
+import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
 import { Plus, Minus, Star, Clock, Info, Leaf } from "lucide-react"
 import { Price } from "./ui/price"
+import { useRouter } from "next/navigation"
 
 interface MenuItemProps {
   id: string
@@ -32,8 +34,11 @@ export function MenuItemCardEnhanced({
   badgeColor = "bg-orange-600",
   category,
 }: MenuItemProps) {
-  const { dispatch } = useCart()
+  const dispatch = useAppDispatch()
+  const { isAuthenticated } = useAppSelector((state) => state.auth)
   const { products } = useAppSelector((state) => state.products)
+  const { toast } = useToast()
+  const router = useRouter()
   const [quantity, setQuantity] = useState(1)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -51,15 +56,28 @@ export function MenuItemCardEnhanced({
     ingredients: ["San Marzano tomatoes", "Fresh mozzarella", "Basil leaves", "Extra virgin olive oil"],
   }
 
-  const addToCart = (qty: number = quantity) => {
+  const addToCartHandler = (qty: number = quantity) => {
     if (!isAvailable) return
 
-    for (let i = 0; i < qty; i++) {
-      dispatch({
-        type: "ADD_ITEM",
-        payload: { id, name, price, description, image },
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to add items to your cart",
+        variant: "destructive",
       })
+      router.push("/auth")
+      return
     }
+
+    // Add the item to cart
+    for (let i = 0; i < qty; i++) {
+      dispatch(addToCart({ id, name, price, description, image }))
+    }
+
+    toast({
+      title: "Added to cart",
+      description: `${name} has been added to your cart`,
+    })
 
     if (isDialogOpen) {
       setIsDialogOpen(false)
@@ -103,16 +121,14 @@ export function MenuItemCardEnhanced({
             <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
               <Badge className="bg-red-600 text-white">Unavailable</Badge>
             </div>
-          )}
-
-          {/* Quick Add Button */}
+          )}          {/* Quick Add Button */}
           {isAvailable && (
             <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <Button
                 size="sm"
                 onClick={(e) => {
                   e.stopPropagation()
-                  addToCart(1)
+                  addToCartHandler(1)
                 }}
                 className="bg-orange-600 hover:bg-orange-700 rounded-full h-8 w-8 p-0 shadow-lg"
               >
@@ -160,10 +176,8 @@ export function MenuItemCardEnhanced({
                   Details
                 </Button>
               </DialogTrigger>
-            </Dialog>
-
-            <Button
-              onClick={() => addToCart(1)}
+            </Dialog>            <Button
+              onClick={() => addToCartHandler(1)}
               disabled={!isAvailable}
               size="sm"
               className="flex-1 bg-orange-600 hover:bg-orange-700"
@@ -268,9 +282,8 @@ export function MenuItemCardEnhanced({
                 <div className="flex items-center space-x-4">
                   <span className="text-xl font-bold text-orange-600">
                     <Price value={price * quantity} />
-                  </span>
-                  <Button
-                    onClick={() => addToCart(quantity)}
+                  </span>                  <Button
+                    onClick={() => addToCartHandler(quantity)}
                     disabled={!isAvailable}
                     className="bg-orange-600 hover:bg-orange-700 px-6"
                   >
