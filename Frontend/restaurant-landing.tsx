@@ -4,19 +4,118 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { MapPin, Clock, Phone, Mail, Star, ChefHat, Users, Award } from "lucide-react"
+import { MapPin, Clock, Phone, Mail, Star, ChefHat, Users, Award, Calendar } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { Header } from "./components/header"
 import { MenuSection } from "./components/menu-section"
 import { useAppDispatch, useAppSelector } from "./redux/hooks"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { getSettings } from "./redux/slices/settingsSlice"
-import { Calendar } from "./components/ui/calendar"
+import { Calendar as CalendarIcon } from "./components/ui/calendar"
+import { useToast } from "./hooks/use-toast"
+import api from "./services/api"
+import { createReservation } from "./redux/slices/reservationSlice"
 
 export default function RestaurantLanding() {
   const dispatch = useAppDispatch();
   const { settings } = useAppSelector((state) => state.settings);
+  const { toast } = useToast();
+
+  // Reservation form state
+  const [reservationForm, setReservationForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    partySize: '',
+    date: '',
+    time: '',
+    seatingPreference: '',
+    occasion: '',
+    specialRequests: '',
+    termsAccepted: false
+  });
+
+  // Loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle form input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setReservationForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Handle checkbox changes
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+    setReservationForm(prev => ({ ...prev, [name]: checked }));
+  };
+
+  // Handle form submission
+  const handleReservation = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!reservationForm.firstName || !reservationForm.lastName || !reservationForm.email || 
+        !reservationForm.phone || !reservationForm.partySize || !reservationForm.date || 
+        !reservationForm.time || !reservationForm.termsAccepted) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields and accept the terms.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Format the data for the API
+      const reservationData = {
+        name: `${reservationForm.firstName} ${reservationForm.lastName}`,
+        email: reservationForm.email,
+        phone: reservationForm.phone,
+        partySize: parseInt(reservationForm.partySize),
+        date: reservationForm.date,
+        time: reservationForm.time,
+        specialRequests: `${reservationForm.seatingPreference ? 'Seating: ' + reservationForm.seatingPreference + '. ' : ''}${reservationForm.occasion ? 'Occasion: ' + reservationForm.occasion + '. ' : ''}${reservationForm.specialRequests}`
+      };
+
+      // Submit to API using Redux
+      const result = await dispatch(createReservation(reservationData)).unwrap();
+      
+      toast({
+        title: "Reservation Requested",
+        description: "We've received your reservation request. You'll receive a confirmation soon!",
+        variant: "default"
+      });
+
+      // Reset form
+      setReservationForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        partySize: '',
+        date: '',
+        time: '',
+        seatingPreference: '',
+        occasion: '',
+        specialRequests: '',
+        termsAccepted: false
+      });
+    } catch (error) {
+      console.error('Reservation error:', error);
+      toast({
+        title: "Reservation Failed",
+        description: "There was a problem submitting your reservation. Please try again or contact us directly.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     dispatch(getSettings());
@@ -291,7 +390,7 @@ export default function RestaurantLanding() {
                     </div>
 
                     <CardContent className="p-8">
-                      <form className="space-y-6">
+                      <form className="space-y-6" onSubmit={handleReservation}>
                         {/* Guest Information */}
                         <div className="space-y-4">
                           <h4 className="font-semibold text-gray-900 text-lg">Guest Information</h4>
@@ -302,6 +401,9 @@ export default function RestaurantLanding() {
                                 placeholder="John"
                                 className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                                 required
+                                name="firstName"
+                                value={reservationForm.firstName}
+                                onChange={handleInputChange}
                               />
                             </div>
                             <div className="space-y-2">
@@ -310,6 +412,9 @@ export default function RestaurantLanding() {
                                 placeholder="Doe"
                                 className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                                 required
+                                name="lastName"
+                                value={reservationForm.lastName}
+                                onChange={handleInputChange}
                               />
                             </div>
                           </div>
@@ -322,6 +427,9 @@ export default function RestaurantLanding() {
                                 placeholder="john@example.com"
                                 className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                                 required
+                                name="email"
+                                value={reservationForm.email}
+                                onChange={handleInputChange}
                               />
                             </div>
                             <div className="space-y-2">
@@ -330,6 +438,9 @@ export default function RestaurantLanding() {
                                 placeholder="(555) 123-4567"
                                 className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                                 required
+                                name="phone"
+                                value={reservationForm.phone}
+                                onChange={handleInputChange}
                               />
                             </div>
                           </div>
@@ -342,7 +453,13 @@ export default function RestaurantLanding() {
                           <div className="grid md:grid-cols-3 gap-4">
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">Party Size *</label>
-                              <select className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white">
+                              <select
+                                className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white"
+                                name="partySize"
+                                value={reservationForm.partySize}
+                                onChange={handleInputChange}
+                                required
+                              >
                                 <option value="">Select guests</option>
                                 <option value="1">1 Guest</option>
                                 <option value="2">2 Guests</option>
@@ -362,11 +479,20 @@ export default function RestaurantLanding() {
                                 className="h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
                                 min={new Date().toISOString().split("T")[0]}
                                 required
+                                name="date"
+                                value={reservationForm.date}
+                                onChange={handleInputChange}
                               />
                             </div>
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">Preferred Time *</label>
-                              <select className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white">
+                              <select
+                                className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white"
+                                name="time"
+                                value={reservationForm.time}
+                                onChange={handleInputChange}
+                                required
+                              >
                                 <option value="">Select time</option>
                                 <option value="11:30">11:30 AM</option>
                                 <option value="12:00">12:00 PM</option>
@@ -395,7 +521,12 @@ export default function RestaurantLanding() {
                           <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">Seating Preference</label>
-                              <select className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white">
+                              <select
+                                className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white"
+                                name="seatingPreference"
+                                value={reservationForm.seatingPreference}
+                                onChange={handleInputChange}
+                              >
                                 <option value="">No preference</option>
                                 <option value="window">Window table</option>
                                 <option value="booth">Booth seating</option>
@@ -406,7 +537,12 @@ export default function RestaurantLanding() {
                             </div>
                             <div className="space-y-2">
                               <label className="text-sm font-medium text-gray-700">Occasion</label>
-                              <select className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white">
+                              <select
+                                className="w-full h-12 px-3 border border-gray-200 rounded-md focus:border-orange-500 focus:ring-orange-500 bg-white"
+                                name="occasion"
+                                value={reservationForm.occasion}
+                                onChange={handleInputChange}
+                              >
                                 <option value="">Regular dining</option>
                                 <option value="birthday">Birthday</option>
                                 <option value="anniversary">Anniversary</option>
@@ -426,6 +562,9 @@ export default function RestaurantLanding() {
                               placeholder="Please let us know about any allergies, dietary restrictions, accessibility needs, or special requests..."
                               rows={4}
                               className="border-gray-200 focus:border-orange-500 focus:ring-orange-500 resize-none"
+                              name="specialRequests"
+                              value={reservationForm.specialRequests}
+                              onChange={handleInputChange}
                             />
                           </div>
                         </div>
@@ -436,8 +575,11 @@ export default function RestaurantLanding() {
                             <input
                               type="checkbox"
                               id="terms"
+                              name="termsAccepted"
                               className="mt-1 h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
                               required
+                              checked={reservationForm.termsAccepted}
+                              onChange={handleCheckboxChange}
                             />
                             <label htmlFor="terms" className="text-sm text-gray-600 leading-relaxed">
                               I agree to the{" "}
@@ -452,9 +594,19 @@ export default function RestaurantLanding() {
                           <Button
                             type="submit"
                             className="w-full h-14 bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                            disabled={isSubmitting}
                           >
-                            <Calendar className="h-5 w-5 mr-2" />
-                            Request Reservation
+                            {isSubmitting ? (
+                              <>
+                                <span className="animate-spin mr-2">⏳</span>
+                                Requesting...
+                              </>
+                            ) : (
+                              <>
+                                <Calendar className="h-5 w-5 mr-2" />
+                                Request Reservation
+                              </>
+                            )}
                           </Button>
 
                           <div className="text-center space-y-2">
