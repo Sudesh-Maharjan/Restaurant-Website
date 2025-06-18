@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -7,8 +9,18 @@ import Image from "next/image"
 import Link from "next/link"
 import { Header } from "./components/header"
 import { MenuSection } from "./components/menu-section"
+import { useAppDispatch, useAppSelector } from "./redux/hooks"
+import { useEffect } from "react"
+import { getSettings } from "./redux/slices/settingsSlice"
 
 export default function RestaurantLanding() {
+  const dispatch = useAppDispatch();
+  const { settings } = useAppSelector((state) => state.settings);
+
+  useEffect(() => {
+    dispatch(getSettings());
+  }, [dispatch]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -106,17 +118,14 @@ export default function RestaurantLanding() {
               <div>
                 <h2 className="text-4xl font-bold mb-8">Visit Us</h2>
 
-                <div className="space-y-6">
-                  <div className="flex items-start space-x-4">
+                <div className="space-y-6">                  <div className="flex items-start space-x-4">
                     <MapPin className="h-6 w-6 text-orange-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-lg">Address</h3>
                       <p className="text-gray-600">
-                        123 Italian Street
+                        {settings?.address}
                         <br />
-                        Downtown District
-                        <br />
-                        New York, NY 10001
+                        {settings?.city}, {settings?.state} {settings?.zipCode}
                       </p>
                     </div>
                   </div>
@@ -126,9 +135,14 @@ export default function RestaurantLanding() {
                     <div>
                       <h3 className="font-semibold text-lg">Hours</h3>
                       <div className="text-gray-600 space-y-1">
-                        <p>Monday - Thursday: 11:30 AM - 10:00 PM</p>
-                        <p>Friday - Saturday: 11:30 AM - 11:00 PM</p>
-                        <p>Sunday: 12:00 PM - 9:00 PM</p>
+                        {settings?.hours ? (
+                          <>
+                            <p>Monday - Friday: {settings.hours.monFri}</p>
+                            <p>Saturday - Sunday: {settings.hours.satSun}</p>
+                          </>
+                        ) : (
+                          <p>{settings?.openingHours}</p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -137,7 +151,7 @@ export default function RestaurantLanding() {
                     <Phone className="h-6 w-6 text-orange-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-lg">Phone</h3>
-                      <p className="text-gray-600">(555) 123-4567</p>
+                      <p className="text-gray-600">{settings?.phone}</p>
                     </div>
                   </div>
 
@@ -145,7 +159,7 @@ export default function RestaurantLanding() {
                     <Mail className="h-6 w-6 text-orange-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-lg">Email</h3>
-                      <p className="text-gray-600">info@bellavista.com</p>
+                      <p className="text-gray-600">{settings?.email}</p>
                     </div>
                   </div>
                 </div>
@@ -221,19 +235,29 @@ export default function RestaurantLanding() {
             </div>
           </div>
         </section>
-      </main>
-
-      {/* Footer */}
+      </main>      {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <ChefHat className="h-8 w-8 text-orange-600" />
-                <span className="text-2xl font-bold text-orange-600">Bella Vista</span>
+                {settings?.logo ? (
+                  <Image 
+                    src={settings.logo} 
+                    alt={settings?.restaurantName || "Restaurant Logo"} 
+                    width={32} 
+                    height={32} 
+                    className="h-8 w-8 object-contain"
+                  />
+                ) : (
+                  <ChefHat className="h-8 w-8 text-orange-600" />
+                )}
+                <span className="text-2xl font-bold text-orange-600">
+                  {settings?.restaurantName || "Bella Vista"}
+                </span>
               </div>
               <p className="text-gray-400">
-                Authentic Italian dining experience in the heart of the city for over 30 years.
+                {settings?.aboutUs || "Authentic Italian dining experience in the heart of the city for over 30 years."}
               </p>
             </div>
 
@@ -266,25 +290,34 @@ export default function RestaurantLanding() {
             <div>
               <h3 className="font-semibold text-lg mb-4">Contact Info</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>123 Italian Street</li>
-                <li>New York, NY 10001</li>
-                <li>(555) 123-4567</li>
-                <li>info@bellavista.com</li>
+                <li>{settings?.address || "123 Italian Street"}</li>
+                <li>{settings?.city || "New York"}, {settings?.state || "NY"} {settings?.zipCode || "10001"}</li>
+                <li>{settings?.phone || "(555) 123-4567"}</li>
+                <li>{settings?.email || "info@bellavista.com"}</li>
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold text-lg mb-4">Hours</h3>
               <ul className="space-y-2 text-gray-400">
-                <li>Mon-Thu: 11:30 AM - 10:00 PM</li>
-                <li>Fri-Sat: 11:30 AM - 11:00 PM</li>
-                <li>Sunday: 12:00 PM - 9:00 PM</li>
+                {settings?.hours ? (
+                  <>
+                    <li>Mon-Fri: {settings.hours.monFri}</li>
+                    <li>Sat-Sun: {settings.hours.satSun}</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Mon-Thu: 11:30 AM - 10:00 PM</li>
+                    <li>Fri-Sat: 11:30 AM - 11:00 PM</li>
+                    <li>Sunday: 12:00 PM - 9:00 PM</li>
+                  </>
+                )}
               </ul>
             </div>
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Bella Vista Restaurant. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} {settings?.restaurantName || "Bella Vista"} Restaurant. All rights reserved.</p>
           </div>
         </div>
       </footer>
