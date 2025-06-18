@@ -12,11 +12,15 @@ import { removeFromCart, updateQuantity, checkout, CartItem } from "@/redux/slic
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import { Price } from "@/components/ui/price"
+import { formatPrice } from "@/lib/currency"
 
 export default function CartPage() {
   const dispatch = useAppDispatch()
   const { items, total, itemCount, isLoading } = useAppSelector(selectCart)
   const { isAuthenticated } = useAppSelector(selectAuth)
+  const { settings } = useAppSelector((state) => state.settings)
+  const currency = settings?.currency || 'USD'
   const { toast } = useToast()
   const router = useRouter()
   const [redirecting, setRedirecting] = useState(false)
@@ -100,7 +104,9 @@ export default function CartPage() {
                         <div className="flex-1">
                           <h3 className="font-medium">{item.name}</h3>
                           <p className="text-sm text-gray-500">{item.description}</p>
-                          <p className="text-orange-600 font-semibold mt-1">${item.price.toFixed(2)}</p>
+                          <p className="text-orange-600 font-semibold mt-1">
+                            <Price value={item.price} />
+                          </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Button
@@ -145,21 +151,21 @@ export default function CartPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span>${total.toFixed(2)}</span>
+                      <span>{formatPrice(total, currency)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Delivery Fee</span>
-                      <span>$4.99</span>
+                      <span>{formatPrice(4.99, currency)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Tax</span>
-                      <span>${(total * 0.08).toFixed(2)}</span>
+                      <span>{formatPrice(total * 0.08, currency)}</span>
                     </div>
                   </div>
                   <Separator />
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total</span>
-                    <span>${(total + 4.99 + total * 0.08).toFixed(2)}</span>
+                    <span>{formatPrice(total + 4.99 + total * 0.08, currency)}</span>
                   </div>
                   <Button
                     onClick={handleCheckout}

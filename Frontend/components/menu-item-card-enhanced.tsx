@@ -9,6 +9,7 @@ import { useCart } from "../contexts/cart-context"
 import { useAppSelector } from "@/redux/hooks"
 import Image from "next/image"
 import { Plus, Minus, Star, Clock, Info, Leaf } from "lucide-react"
+import { Price } from "./ui/price"
 
 interface MenuItemProps {
   id: string
@@ -124,7 +125,9 @@ export function MenuItemCardEnhanced({
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
             <CardTitle className="text-lg leading-tight">{name}</CardTitle>
-            <span className="text-orange-600 font-bold text-lg ml-2">${price}</span>
+            <span className="text-orange-600 font-bold text-lg ml-2">
+              <Price value={price} />
+            </span>
           </div>
 
           {/* Quick Info */}
@@ -187,7 +190,9 @@ export function MenuItemCardEnhanced({
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold text-orange-600">${price}</span>
+                <span className="text-3xl font-bold text-orange-600">
+                  <Price value={price} />
+                </span>
                 <div className="flex items-center space-x-2">
                   <Star className="h-5 w-5 text-yellow-500 fill-current" />
                   <span className="font-medium">{mockData.rating}</span>
@@ -261,7 +266,9 @@ export function MenuItemCardEnhanced({
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <span className="text-xl font-bold text-orange-600">${(price * quantity).toFixed(2)}</span>
+                  <span className="text-xl font-bold text-orange-600">
+                    <Price value={price * quantity} />
+                  </span>
                   <Button
                     onClick={() => addToCart(quantity)}
                     disabled={!isAvailable}

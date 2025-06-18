@@ -8,6 +8,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { addToCart, removeFromCart, updateQuantity } from "@/redux/slices/cartSlice"
+import { Price } from "./ui/price"
 
 export function CartSidebar() {
   const dispatch = useAppDispatch()
@@ -62,7 +63,9 @@ export function CartSidebar() {
                     />
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm truncate">{item.name}</h4>
-                      <p className="text-orange-600 font-semibold">${item.price.toFixed(2)}</p>
+                      <p className="text-orange-600 font-semibold">
+                        <Price value={item.price} />
+                      </p>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Button
@@ -101,7 +104,9 @@ export function CartSidebar() {
             <div className="border-t pt-4 space-y-4">
               <div className="flex justify-between items-center text-lg font-semibold">
                 <span>Total:</span>
-                <span className="text-orange-600">${total.toFixed(2)}</span>
+                <span className="text-orange-600">
+                  <Price value={total} />
+                </span>
               </div>
               <Link href="/checkout" className="w-full">
                 <Button className="w-full bg-orange-600 hover:bg-orange-700">Proceed to Checkout</Button>

@@ -26,11 +26,14 @@ import { Header } from "../../components/header"
 import { MenuItemCardEnhanced } from "../../components/menu-item-card-enhanced"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { getProducts } from "@/redux/slices/productsSlice"
+import { formatPrice } from "@/lib/currency"
 
 export default function MenuPage() {
   const dispatch = useAppDispatch();
   const { products, isLoading } = useAppSelector((state) => state.products);
   const { menuFile } = useAppSelector((state) => state.menu);
+  const settings = useAppSelector((state) => state.settings.settings)
+  const currency = settings?.currency || 'USD'
   
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
@@ -358,7 +361,7 @@ export default function MenuPage() {
                           <p>
                             {stats.available} of {stats.total} available
                           </p>
-                          <p className="font-medium text-orange-600">Avg ${stats.avgPrice.toFixed(2)}</p>
+                          <p className="font-medium text-orange-600">Avg {formatPrice(stats.avgPrice, currency)}</p>
                         </div>
                       </CardContent>
                     </Card>

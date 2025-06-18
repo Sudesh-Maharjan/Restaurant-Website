@@ -8,12 +8,15 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { getOrders } from "@/redux/slices/orderSlice"
 import { getCustomers } from "@/redux/slices/customerSlice"
 import { getProducts } from "@/redux/slices/productSlice"
+import { formatPrice } from "@/lib/currency"
 
 export default function AdminDashboard() {
   const dispatch = useAppDispatch()
   const { orders, isLoading: ordersLoading } = useAppSelector((state) => state.orders)
   const { customers, isLoading: customersLoading } = useAppSelector((state) => state.customers)
   const { products } = useAppSelector((state) => state.product) // Change state.products to state.product
+  const { settings } = useAppSelector((state) => state.settings)
+  const currency = settings?.currency || 'USD'
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -94,7 +97,7 @@ export default function AdminDashboard() {
                 <DollarSign className="h-4 w-4 text-gray-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+                <div className="text-2xl font-bold">{formatPrice(totalRevenue, currency)}</div>
                 <div className="flex items-center text-xs text-green-500 mt-1">
                   <ArrowUpRight className="h-3 w-3 mr-1" />
                   <span>From {totalOrders} orders</span>
@@ -138,7 +141,7 @@ export default function AdminDashboard() {
                 <TrendingUp className="h-4 w-4 text-gray-500" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${avgOrderValue.toFixed(2)}</div>
+                <div className="text-2xl font-bold">{formatPrice(avgOrderValue, currency)}</div>
                 <div className="flex items-center text-xs text-green-500 mt-1">
                   <ArrowUpRight className="h-3 w-3 mr-1" />
                   <span>Per order</span>
@@ -177,7 +180,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div>
-                    <div className="font-medium text-right">${order.total.toFixed(2)}</div>
+                    <div className="font-medium text-right">{formatPrice(order.total, currency)}</div>
                     <div
                       className={`text-sm ${
                         order.status === "delivered"

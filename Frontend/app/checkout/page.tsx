@@ -1,99 +1,100 @@
 "use client"
 
-import type React from "react"
-
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { ArrowLeft, CreditCard, MapPin, Clock, Loader2 } from "lucide-react"
+import { ArrowLeft, Clock, CreditCard, Loader2, MapPin } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useAppDispatch, useAppSelector } from "@/redux/hooks"
+import { useAppDispatch, useAppSelector, selectAuth, selectCart } from "@/redux/hooks"
 import { clearCart } from "@/redux/slices/cartSlice"
-import { createOrder } from "@/redux/slices/orderSlice"
 import { createCustomer } from "@/redux/slices/customerSlice"
-import { useToast } from "@/hooks/use-toast"
+import { createOrder } from "@/redux/slices/orderSlice"
+import { useToast } from "@/components/ui/use-toast"
+import { formatPrice } from "@/lib/currency"
+
+// Import these at the top of your file
+import { Price } from "@/components/ui/price"
 
 export default function CheckoutPage() {
-  const cartState = useAppSelector((state) => state.cart)
-  const { user } = useAppSelector((state) => state.auth)
-  const dispatch = useAppDispatch()
   const router = useRouter()
+  const dispatch = useAppDispatch()
+  const cartState = useAppSelector(selectCart)
+  const { user, isAuthenticated } = useAppSelector(selectAuth)
+  const { settings } = useAppSelector((state) => state.settings)
+  const currency = settings?.currency || 'USD'
   const { toast } = useToast()
   
-  const [orderType, setOrderType] = useState<"delivery" | "pickup">("delivery")
-  const [paymentMethod, setPaymentMethod] = useState<"card" | "cash">("card")
+  const [orderType, setOrderType] = useState("delivery") // delivery or pickup
+  const [paymentMethod, setPaymentMethod] = useState("card") // card or cash
   const [isSubmitting, setIsSubmitting] = useState(false)
+  
   const [formData, setFormData] = useState({
-    firstName: user?.name?.split(' ')[0] || "",
-    lastName: user?.name?.split(' ')[1] || "",
+    firstName: user?.name?.split(" ")[0] || "",
+    lastName: user?.name?.split(" ")[1] || "",
     email: user?.email || "",
-    phone: "",
+    phone: user?.phone || "",
     address: "",
     city: "",
     state: "",
     zipCode: "",
     deliveryInstructions: "",
-    pickupDate: "",
-    pickupTime: "",
+    pickupDate: new Date().toISOString().split("T")[0],
+    pickupTime: "12:00",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
     cardholderName: "",
   })
-
-  const deliveryFee = orderType === "delivery" ? 3.99 : 0
-  const tax = (cartState.total + deliveryFee) * 0.08875
+  
+  // Calculate order total
+  const deliveryFee = orderType === "delivery" ? 4.99 : 0
+  const tax = cartState.total * 0.08
   const finalTotal = cartState.total + deliveryFee + tax
+
+  // Redirect to cart if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Authentication required",
+        description: "Please login to checkout",
+        variant: "destructive",
+      })
+      router.push("/auth")
+    }
+  }, [isAuthenticated, router, toast])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+    setFormData({
+      ...formData,
+      [name]: value,
+    })
   }
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-
-    // Validate required fields
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required customer information fields.",
-        variant: "destructive"
-      })
-      setIsSubmitting(false)
-      return
-    }
-
+    
+    // Validate form based on order type and payment method
     if (orderType === "delivery" && (!formData.address || !formData.city || !formData.state || !formData.zipCode)) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all delivery address fields.",
+        description: "Please fill in all delivery address fields",
         variant: "destructive"
       })
       setIsSubmitting(false)
       return
     }
-
-    if (orderType === "pickup" && (!formData.pickupDate || !formData.pickupTime)) {
+    
+    if (paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) {
       toast({
         title: "Missing Information",
-        description: "Please select pickup date and time.",
-        variant: "destructive"
-      })
-      setIsSubmitting(false)
-      return
-    }
-
-    if (paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv)) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all payment information.",
+        description: "Please fill in all payment details",
         variant: "destructive"
       })
       setIsSubmitting(false)
@@ -486,7 +487,9 @@ export default function CheckoutPage() {
                           <p className="text-sm font-medium truncate">{item.name}</p>
                           <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                         </div>
-                        <p className="text-sm font-medium">${(item.price * item.quantity).toFixed(2)}</p>
+                        <p className="text-sm font-medium">
+                          <Price value={item.price * item.quantity} />
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -496,22 +499,22 @@ export default function CheckoutPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>${cartState.total.toFixed(2)}</span>
+                      <span>{formatPrice(cartState.total, currency)}</span>
                     </div>
                     {orderType === "delivery" && (
                       <div className="flex justify-between text-sm">
                         <span>Delivery Fee</span>
-                        <span>${deliveryFee.toFixed(2)}</span>
+                        <span>{formatPrice(deliveryFee, currency)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-sm">
                       <span>Tax</span>
-                      <span>${tax.toFixed(2)}</span>
+                      <span>{formatPrice(tax, currency)}</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between font-semibold">
                       <span>Total</span>
-                      <span className="text-orange-600">${finalTotal.toFixed(2)}</span>
+                      <span className="text-orange-600">{formatPrice(finalTotal, currency)}</span>
                     </div>
                   </div>
 

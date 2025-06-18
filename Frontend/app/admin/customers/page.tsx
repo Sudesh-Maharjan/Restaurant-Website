@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { getCustomers, getCustomer, createCustomer, updateCustomer, deleteCustomer, Customer } from "@/redux/slices/customerSlice"
 import { getOrders } from "@/redux/slices/orderSlice"
 import { useToast } from "@/hooks/use-toast"
+import { formatPrice } from "@/lib/currency"
 import { 
   Form, 
   FormControl, 
@@ -56,6 +57,8 @@ export default function AdminCustomers() {
   const dispatch = useAppDispatch()
   const { customers, isLoading, error } = useAppSelector((state) => state.customers)
   const { orders } = useAppSelector((state) => state.orders)
+  const settings = useAppSelector((state) => state.settings.settings)
+  const currency = settings?.currency || 'USD'
   const { toast } = useToast()
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -260,13 +263,13 @@ export default function AdminCustomers() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Avg. Order Value</p>
                 <p className="text-2xl font-bold text-green-600">
-                  $
                   {customers.length > 0 && customers.reduce((sum, c) => sum + c.totalOrders, 0) > 0
-                    ? (
+                    ? formatPrice(
                         customers.reduce((sum, c) => sum + c.totalSpent, 0) /
-                        customers.reduce((sum, c) => sum + c.totalOrders, 0)
-                      ).toFixed(2)
-                    : "0.00"}
+                        customers.reduce((sum, c) => sum + c.totalOrders, 0),
+                        currency
+                      )
+                    : formatPrice(0, currency)}
                 </p>
               </div>
               <DollarSign className="h-8 w-8 text-green-600" />
@@ -359,7 +362,7 @@ export default function AdminCustomers() {
                         <Badge className={customerTier.color}>{customerTier.tier}</Badge>
                       </TableCell>
                       <TableCell className="font-medium">{customer.totalOrders}</TableCell>
-                      <TableCell className="font-medium text-green-600">${customer.totalSpent.toFixed(2)}</TableCell>
+                      <TableCell className="font-medium text-green-600">{formatPrice(customer.totalSpent, currency)}</TableCell>
                       <TableCell>{formatDate(customer.joinedDate)}</TableCell>
                       <TableCell>{formatDate(customer.lastOrderDate)}</TableCell>
                       <TableCell className="text-right">
@@ -431,13 +434,13 @@ export default function AdminCustomers() {
                       <strong>Total Orders:</strong> {selectedCustomer.totalOrders}
                     </p>
                     <p>
-                      <strong>Total Spent:</strong> ${selectedCustomer.totalSpent.toFixed(2)}
+                      <strong>Total Spent:</strong> {formatPrice(selectedCustomer.totalSpent, currency)}
                     </p>
                     <p>
-                      <strong>Avg Order:</strong> ${
+                      <strong>Avg Order:</strong> {
                         selectedCustomer.totalOrders > 0
-                          ? (selectedCustomer.totalSpent / selectedCustomer.totalOrders).toFixed(2)
-                          : "0.00"
+                          ? formatPrice(selectedCustomer.totalSpent / selectedCustomer.totalOrders, currency)
+                          : formatPrice(0, currency)
                       }
                     </p>
                     <p>
@@ -466,7 +469,7 @@ export default function AdminCustomers() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">${order.totalAmount.toFixed(2)}</p>
+                            <p className="font-medium">{formatPrice(order.total, currency)}</p>
                             <Badge
                               className={`text-xs ${
                                 order.status === "completed"

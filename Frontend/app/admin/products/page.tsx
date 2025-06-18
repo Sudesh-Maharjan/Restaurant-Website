@@ -34,10 +34,14 @@ import Image from "next/image"
 import { useAppDispatch, useAppSelector } from "@/redux/hooks"
 import { Product, createProduct, deleteProduct, getProducts, updateProduct } from "@/redux/slices/productSlice"
 import { useToast } from "@/hooks/use-toast"
+import { formatPrice } from "@/lib/currency"
 
 export default function AdminProducts() {
   const dispatch = useAppDispatch()
+  // Change from state.products to state.product to match the correct slice
   const { products, isLoading, error } = useAppSelector((state) => state.product)
+  const { settings } = useAppSelector((state) => state.settings)
+  const currency = settings?.currency || 'USD'
   const { toast } = useToast()
   
   const [searchTerm, setSearchTerm] = useState("")
@@ -59,6 +63,7 @@ export default function AdminProducts() {
     }
   }, [error, toast])
 
+  // Add null check for products array
   const filteredProducts = Array.isArray(products) 
     ? products.filter(
         (product) =>
@@ -223,7 +228,7 @@ export default function AdminProducts() {
                 </Select>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label className="text-right">Price ($) *</Label>
+                <Label className="text-right">Price *</Label>
                 <Input
                   className="col-span-3"
                   type="number"
@@ -347,7 +352,7 @@ export default function AdminProducts() {
                       </TableCell>
                       <TableCell className="font-medium">{product.name}</TableCell>
                       <TableCell>{product.category}</TableCell>
-                      <TableCell>${product.price.toFixed(2)}</TableCell>
+                      <TableCell>{formatPrice(product.price, currency)}</TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs ${
