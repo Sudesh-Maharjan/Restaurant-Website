@@ -225,7 +225,7 @@ export default function RestaurantLanding() {
                       <p className="text-gray-600">
                         {settings?.address}
                         <br />
-                        {settings?.city}, {settings?.state} {settings?.zipCode}
+                        {/* {settings?.city}, {settings?.state} {settings?.zipCode} */}
                       </p>
                     </div>
                   </div>
@@ -265,14 +265,9 @@ export default function RestaurantLanding() {
                   </div>
                   </div>
                 </div>
-              </div>              <div className="bg-gray-300 rounded-lg h-96 flex items-center justify-center overflow-hidden">
-                <Image 
-                  src="https://maps.googleapis.com/maps/api/staticmap?center=New+York,NY&zoom=13&size=600x400&maptype=roadmap&markers=color:red%7Clabel:R%7CNew+York,NY&key=YOUR_API_KEY"
-                  alt="Restaurant location map"
-                  width={600}
-                  height={400}
-                  className="w-full h-full object-cover"
-                />
+              </div>    
+                        <div className="rounded-lg h-96 flex items-center justify-center overflow-hidden">
+               <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d56516.277781717035!2d85.28484722733138!3d27.709030216300327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb198a307baabf%3A0xb5137c1bf18db1ea!2sKathmandu%2044600!5e0!3m2!1sen!2snp!4v1750304754803!5m2!1sen!2snp" width="600" height="450" loading="lazy" ></iframe>
               </div>
             </div>
           </div>
@@ -687,7 +682,7 @@ export default function RestaurantLanding() {
               <h3 className="font-semibold text-lg mb-4">Contact Info</h3>
               <ul className="space-y-2 text-gray-400">
                 <li>{settings?.address || "123 Italian Street"}</li>
-                <li>{settings?.city || "New York"}, {settings?.state || "NY"} {settings?.zipCode || "10001"}</li>
+                {/* <li>{settings?.city }, {settings?.state || "NY"} {settings?.zipCode || "10001"}</li> */}
                 <li>{settings?.phone || "(555) 123-4567"}</li>
                 <li>{settings?.email || "info@bellavista.com"}</li>
               </ul>
