@@ -21,24 +21,25 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? 
   process.env.ALLOWED_ORIGINS.split(',') : 
-  ['http://localhost:3000', 'https://restaurant-website-five-ebon.vercel.app'];
+  ['http://localhost:3000', 'https://restaurant-website-five-ebon.vercel.app', 'https://restaurant-website-backend-six.vercel.app'];
+
+// For debugging
+console.log('Allowed Origins:', allowedOrigins);
 
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log(`Origin ${origin} not allowed by CORS`);
-      callback(null, true); // Still allow for development - change to false in production for strict CORS
-    }
-  },
+  origin: '*', // Allow all origins for now to debug the issue
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Add preflight response headers for all routes
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
