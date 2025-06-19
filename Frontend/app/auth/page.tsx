@@ -90,7 +90,6 @@ export default function AuthPage() {
       }
     }
   }
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Simple header for auth page */}
@@ -99,12 +98,8 @@ export default function AuthPage() {
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
               <ArrowLeft className="h-5 w-5" />
-              <span className="font-medium">Back to Website</span>
             </Link>
-            <Link href="/" className="flex items-center space-x-2">
-              <ChefHat className="h-8 w-8 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">Bella Vista</span>
-            </Link>
+          
             <div></div>
           </div>
         </div>
@@ -118,9 +113,13 @@ export default function AuthPage() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             {isLogin ? "Sign in to your account" : "Create a new account"}
           </h2>
-        </div>
-
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        </div>        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative">
+          {isLoading && (
+            <div className="absolute inset-0 bg-white/80 z-50 flex flex-col items-center justify-center rounded-lg">
+              <Loader2 className="h-12 w-12 text-orange-600 animate-spin mb-4" />
+              <p className="text-gray-600 font-medium">{isLogin ? "Signing in..." : "Creating account..."}</p>
+            </div>
+          )}
           <Card>
             <CardHeader>
               <Tabs
@@ -144,9 +143,7 @@ export default function AuthPage() {
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="login">Login</TabsTrigger>
                   <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="login">
+                </TabsList>                <TabsContent value="login">
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
                       <label className="block text-sm font-medium mb-2">Email</label>
@@ -157,6 +154,7 @@ export default function AuthPage() {
                         required 
                         value={formData.email}
                         onChange={handleChange}
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -170,11 +168,13 @@ export default function AuthPage() {
                           required 
                           value={formData.password}
                           onChange={handleChange}
+                          disabled={isLoading}
                         />
                         <button
                           type="button"
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                           onClick={togglePasswordVisibility}
+                          disabled={isLoading}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
@@ -188,6 +188,7 @@ export default function AuthPage() {
                           name="remember-me"
                           type="checkbox"
                           className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                          disabled={isLoading}
                         />
                         <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
                           Remember me
@@ -206,9 +207,7 @@ export default function AuthPage() {
                       )}
                     </Button>
                   </form>
-                </TabsContent>
-
-                <TabsContent value="signup">
+                </TabsContent>                <TabsContent value="signup">
                   <form className="space-y-4" onSubmit={handleSubmit}>
                     <div>
                       <label className="block text-sm font-medium mb-2">Name</label>
@@ -219,6 +218,7 @@ export default function AuthPage() {
                         required 
                         value={formData.name}
                         onChange={handleChange}
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -231,6 +231,7 @@ export default function AuthPage() {
                         required 
                         value={formData.email}
                         onChange={handleChange}
+                        disabled={isLoading}
                       />
                     </div>
 
@@ -244,11 +245,13 @@ export default function AuthPage() {
                           required 
                           value={formData.password}
                           onChange={handleChange}
+                          disabled={isLoading}
                         />
                         <button
                           type="button"
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                           onClick={togglePasswordVisibility}
+                          disabled={isLoading}
                         >
                           {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>

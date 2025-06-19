@@ -4,7 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import webSocketService from '@/services/websocket';
 import { addOrderViaWebSocket, updateOrderViaWebSocket } from '@/redux/slices/orderSlice';
+import { addNotification } from '@/redux/slices/notificationSlice';
 import { useToast } from '@/hooks/use-toast';
+import { v4 as uuidv4 } from 'uuid';
 
 interface WebSocketProviderProps {
   children: React.ReactNode;
@@ -41,7 +43,24 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
       
       if (data.event === 'created') {
         dispatch(addOrderViaWebSocket(data.order));
-        // Show notification for new order
+        
+        // Add notification for new order
+        const notificationId = uuidv4();
+        const notification = {
+          id: notificationId,
+          title: user?.role === 'admin' ? 'New Order Received' : 'Order Placed',
+          message: user?.role === 'admin' 
+            ? `Order #${data.order._id.substr(-6)} has been placed` 
+            : 'Your order has been received by the restaurant',
+          type: 'order_placed' as const,
+          isRead: false,
+          orderId: data.order._id,
+          timestamp: new Date().toISOString(),
+        };
+        
+        dispatch(addNotification(notification));
+        
+        // Show toast notification
         if (user?.role === 'admin') {
           toast({
             title: 'New Order Received',
@@ -57,7 +76,8 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
         }
       } else if (data.event === 'statusUpdated') {
         dispatch(updateOrderViaWebSocket(data.order));
-        // Show notification for status update
+        
+        // Status message mapping
         const statusMessages: Record<string, string> = {
           pending: 'Your order has been received',
           preparing: 'Your order is being prepared',
@@ -66,6 +86,21 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
           cancelled: 'Your order has been cancelled'
         };
         
+        // Create notification for status update
+        const notificationId = uuidv4();
+        const notification = {
+          id: notificationId,
+          title: 'Order Status Updated',
+          message: statusMessages[data.order.status] || `Status: ${data.order.status}`,
+          type: 'status_update' as const,
+          isRead: false,
+          orderId: data.order._id,
+          timestamp: new Date().toISOString(),
+        };
+        
+        dispatch(addNotification(notification));
+        
+        // Show toast notification for customer
         if (user?.role !== 'admin') {
           toast({
             title: 'Order Status Updated',

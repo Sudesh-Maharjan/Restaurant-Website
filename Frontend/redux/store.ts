@@ -8,6 +8,7 @@ import cartReducer from './slices/cartSlice'
 import menuReducer from './slices/menuSlice'
 import settingsReducer from './slices/settingsSlice'
 import reservationReducer from './slices/reservationSlice'
+import notificationReducer from './slices/notificationSlice'
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     menu: menuReducer,
     settings: settingsReducer,
     reservations: reservationReducer,
+    notifications: notificationReducer,
   },
 })
 

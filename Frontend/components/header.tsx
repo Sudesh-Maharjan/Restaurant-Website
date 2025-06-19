@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ChefHat, User, LogOut, ShoppingCart, Calendar, Package, Menu as MenuIcon, X, Home, Info, MapPin, Mail } from "lucide-react"
+import { ChefHat, User, LogOut, ShoppingCart, Calendar, Package, Menu as MenuIcon, X, Home, Info, MapPin, Mail, Bell } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import Image from "next/image"
@@ -19,12 +19,14 @@ import { getSettings } from "@/redux/slices/settingsSlice"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import NotificationDropdown from "./notification-dropdown"
 
 export function Header() {
   const dispatch = useAppDispatch()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
   const { items, itemCount } = useAppSelector((state) => state.cart)
   const { settings } = useAppSelector((state) => state.settings)
+  const { unreadCount } = useAppSelector((state) => state.notifications)
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -99,9 +101,10 @@ export function Header() {
                 <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-orange-600 group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
-          </nav>
-          
-          <div className="flex items-center space-x-4">
+          </nav>          <div className="flex items-center space-x-4">
+            {isAuthenticated && user && (
+              <NotificationDropdown />
+            )}
             <Link href="/cart">
               <Button variant="ghost" size="sm" className="relative rounded-full h-10 w-10 flex items-center justify-center hover:bg-orange-100 transition-colors duration-200 shadow-sm">
                 <ShoppingCart className="h-5 w-5 text-gray-700" />
@@ -221,41 +224,51 @@ export function Header() {
                         <span>{link.label}</span>
                       </Link>
                     ))}
-                  </div>
-                  
-                  <div className="mt-auto pb-6 space-y-4">
-                    {isAuthenticated && user ? (
-                      <>
-                        <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
-                          <Avatar className="h-10 w-10 border-2 border-orange-100">
-                            <AvatarImage src="/placeholder-user.jpg" alt={user.name} />
-                            <AvatarFallback className="bg-orange-100 text-orange-800 font-medium">
-                              {user.name.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{user.name}</p>
-                            <p className="text-sm text-gray-500">{user.email}</p>
-                          </div>
-                        </div>
-                        
-                        <Link 
-                          href="/profile" 
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-orange-50 transition-colors"
-                        >
-                          <User className="h-4 w-4 mr-3 text-orange-600" />
-                          Profile
-                        </Link>
-                        
-                        <Link 
-                          href="/orders" 
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-orange-50 transition-colors"
-                        >
-                          <Package className="h-4 w-4 mr-3 text-orange-600" />
-                          My Orders
-                        </Link>
+                  </div>                        <div className="mt-auto pb-6 space-y-4">
+                          {isAuthenticated && user ? (
+                            <>
+                              <div className="flex items-center space-x-3 pb-4 border-b border-gray-100">
+                                <Avatar className="h-10 w-10 border-2 border-orange-100">
+                                  <AvatarImage src="/placeholder-user.jpg" alt={user.name} />
+                                  <AvatarFallback className="bg-orange-100 text-orange-800 font-medium">
+                                    {user.name.charAt(0).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{user.name}</p>
+                                  <p className="text-sm text-gray-500">{user.email}</p>
+                                </div>
+                              </div>
+                              
+                              <Link 
+                                href="/profile" 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-orange-50 transition-colors"
+                              >
+                                <User className="h-4 w-4 mr-3 text-orange-600" />
+                                Profile
+                              </Link>
+                              
+                              <Link 
+                                href="/orders" 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-orange-50 transition-colors"
+                              >
+                                <Package className="h-4 w-4 mr-3 text-orange-600" />
+                                My Orders
+                              </Link>                                <Link 
+                                href="#" 
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="flex items-center px-3 py-2 text-sm rounded-md hover:bg-orange-50 transition-colors"
+                              >
+                                <Bell className="h-4 w-4 mr-3 text-orange-600" />
+                                Notifications
+                                {unreadCount > 0 && (
+                                  <span className="ml-2 bg-orange-600 text-white text-xs rounded-full px-2 py-0.5">
+                                    {unreadCount}
+                                  </span>
+                                )}
+                              </Link>
                         
                         {user.role === 'admin' && (
                           <Link 

@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Price } from "@/components/ui/price"
-import { Search, Eye, Package, Truck, CheckCircle, XCircle, Clock, Loader2, DollarSign } from "lucide-react"
+import { Search, Eye, Package, Truck, CheckCircle, XCircle, Clock, Loader2, DollarSign, User, MapPin, Check } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -77,14 +77,18 @@ export default function AdminOrders() {
     setSelectedOrder(order)
     setIsDialogOpen(true)
   }
-
   const handleUpdateOrderStatus = (orderId: string, status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled') => {
     dispatch(updateOrderStatus({ 
       id: orderId, 
       status
     }))
       .unwrap()
-      .then(() => {
+      .then((updatedOrder) => {
+        // Update the selected order with the updated data
+        if (selectedOrder && selectedOrder._id === orderId) {
+          setSelectedOrder(updatedOrder);
+        }
+        
         toast({
           title: "Success",
           description: "Order status updated successfully",
@@ -302,26 +306,37 @@ export default function AdminOrders() {
             </Table>
           )}
         </CardContent>
-      </Card>
-
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      </Card>      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-            <DialogDescription>
-              Order #{selectedOrder?._id.slice(-8)} - {formatDate(selectedOrder?.createdAt || "")}
+            <DialogTitle className="text-2xl font-bold flex items-center">
+              <span className="bg-orange-100 text-orange-600 rounded-full w-8 h-8 flex items-center justify-center mr-2">
+                📋
+              </span>
+              Order Details
+            </DialogTitle>
+            <DialogDescription className="text-gray-500 flex items-center justify-between">
+              <span>Order #{selectedOrder?._id.slice(-8)} • {formatDate(selectedOrder?.createdAt || "")}</span>
+              {selectedOrder && (
+                <Badge className={`${statusColors[selectedOrder.status]} px-3 py-1`}>
+                  {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
+                </Badge>
+              )}
             </DialogDescription>
           </DialogHeader>
 
           {selectedOrder && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2">
-                <div className="border rounded-lg p-4 space-y-4">
-                  <h3 className="font-semibold">Items</h3>
+                <div className="border rounded-lg p-4 space-y-4 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 flex items-center border-b pb-2">
+                    <Package className="h-4 w-4 mr-2 text-orange-600" />
+                    Order Items
+                  </h3>
                   <div className="space-y-3">
                     {selectedOrder.items.map((item, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className="relative h-12 w-12 rounded overflow-hidden">
+                      <div key={index} className="flex items-center space-x-3 py-2 hover:bg-gray-50 px-2 rounded-md transition-colors">
+                        <div className="relative h-14 w-14 rounded-md overflow-hidden border border-gray-200">
                           <Image
                             src={item.image ? (item.image.startsWith('/uploads') ? `http://localhost:5000${item.image}` : item.image) : '/placeholder.svg'}
                             alt={item.name}
@@ -330,12 +345,12 @@ export default function AdminOrders() {
                           />
                         </div>
                         <div className="flex-1">
-                          <div className="font-medium">{item.name}</div>
+                          <div className="font-medium text-gray-800">{item.name}</div>
                           <div className="text-sm text-gray-500">
                             <Price value={item.price} /> x {item.quantity}
                           </div>
                         </div>
-                        <div className="font-semibold">
+                        <div className="font-semibold text-gray-900">
                           <Price value={item.price * item.quantity} />
                         </div>
                       </div>
@@ -343,83 +358,112 @@ export default function AdminOrders() {
                   </div>
 
                   <div className="pt-3 border-t space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-sm text-gray-600">
                       <span>Subtotal</span>
                       <Price value={selectedOrder.total} />
                     </div>
-                    <div className="flex justify-between font-semibold">
+                    <div className="flex justify-between font-semibold text-gray-900">
                       <span>Total</span>
-                      <Price value={selectedOrder.total} />
+                      <span className="text-orange-600">
+                        <Price value={selectedOrder.total} />
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Customer Information</h3>
-                  <div className="space-y-1">
-                    <p className="text-sm">{selectedOrder.customer?.name || 'Guest'}</p>
-                    <p className="text-sm">{selectedOrder.email || selectedOrder.customer?.email || 'No email provided'}</p>
-                    <p className="text-sm">{selectedOrder.phone || selectedOrder.customer?.phone || 'No phone provided'}</p>
+                <div className="border rounded-lg p-4 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 flex items-center border-b pb-2 mb-3">
+                    <User className="h-4 w-4 mr-2 text-orange-600" />
+                    Customer Information
+                  </h3>
+                  <div className="space-y-2">
+                    <p className="text-sm flex items-center">
+                      <span className="w-20 text-gray-500">Name:</span>
+                      <span className="font-medium">{selectedOrder.customer?.name || 'Guest'}</span>
+                    </p>
+                    <p className="text-sm flex items-center">
+                      <span className="w-20 text-gray-500">Email:</span>
+                      <span>{selectedOrder.email || selectedOrder.customer?.email || 'No email provided'}</span>
+                    </p>
+                    <p className="text-sm flex items-center">
+                      <span className="w-20 text-gray-500">Phone:</span>
+                      <span>{selectedOrder.phone || selectedOrder.customer?.phone || 'No phone provided'}</span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Delivery Address</h3>
+                <div className="border rounded-lg p-4 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 flex items-center border-b pb-2 mb-3">
+                    <MapPin className="h-4 w-4 mr-2 text-orange-600" />
+                    Delivery Address
+                  </h3>
                   <p className="text-sm">
                     {selectedOrder.address || 'No address provided'}
                   </p>
                 </div>
 
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Payment Status</h3>
+                <div className="border rounded-lg p-4 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 flex items-center border-b pb-2 mb-3">
+                    <DollarSign className="h-4 w-4 mr-2 text-orange-600" />
+                    Payment Information
+                  </h3>
                   <div className="space-y-2">
-                    {selectedOrder.paid ? (
-                      <Badge className="bg-green-100 text-green-800">
-                        <DollarSign className="h-3 w-3 mr-1" />
-                        Paid
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        Unpaid
-                      </Badge>
-                    )}
-                    <p className="text-sm">Method: {selectedOrder.paymentMethod || 'Not specified'}</p>
+                    <p className="text-sm flex items-center">
+                      <span className="w-20 text-gray-500">Status:</span>
+                      {selectedOrder.paid ? (
+                        <Badge className="bg-green-100 text-green-800">
+                          <DollarSign className="h-3 w-3 mr-1" />
+                          Paid
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          Unpaid
+                        </Badge>
+                      )}
+                    </p>
+                    <p className="text-sm flex items-center">
+                      <span className="w-20 text-gray-500">Method:</span>
+                      <span>{selectedOrder.paymentMethod || 'Not specified'}</span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="border rounded-lg p-4">
-                  <h3 className="font-semibold mb-2">Order Status</h3>
-                  <div className="space-y-2">
-                    <Badge className={`${statusColors[selectedOrder.status]} mb-4`}>
-                      {selectedOrder.status.charAt(0).toUpperCase() + selectedOrder.status.slice(1)}
-                    </Badge>
-
-                    <div className="grid grid-cols-2 gap-2">                      {selectedOrder.status === "pending" && (
+                <div className="border rounded-lg p-4 shadow-sm">
+                  <h3 className="font-semibold text-gray-800 flex items-center border-b pb-2 mb-3">
+                    <Clock className="h-4 w-4 mr-2 text-orange-600" />
+                    Order Status
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-2">                      
+                      {selectedOrder.status === "pending" && (
                         <Button
-                          variant="outline"
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
                           size="sm"
                           onClick={() => handleUpdateOrderStatus(selectedOrder._id, "preparing")}
                         >
+                          <Package className="h-4 w-4 mr-2" />
                           Mark as Preparing
                         </Button>
                       )}
                       {selectedOrder.status === "preparing" && (
                         <Button
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 text-white"
                           size="sm"
                           onClick={() => handleUpdateOrderStatus(selectedOrder._id, "ready")}
                         >
+                          <CheckCircle className="h-4 w-4 mr-2" />
                           Mark as Ready
                         </Button>
                       )}
                       {selectedOrder.status === "ready" && (
                         <Button
-                          className="bg-green-600 hover:bg-green-700"
+                          className="bg-green-600 hover:bg-green-700 text-white"
                           size="sm"
                           onClick={() => handleUpdateOrderStatus(selectedOrder._id, "delivered")}
                         >
+                          <Truck className="h-4 w-4 mr-2" />
                           Mark as Delivered
                         </Button>
                       )}
@@ -429,9 +473,44 @@ export default function AdminOrders() {
                           size="sm"
                           onClick={() => handleUpdateOrderStatus(selectedOrder._id, "cancelled")}
                         >
+                          <XCircle className="h-4 w-4 mr-2" />
                           Cancel Order
                         </Button>
                       )}
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Status Timeline</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center text-xs">
+                          <div className={`w-5 h-5 rounded-full mr-2 flex items-center justify-center ${selectedOrder.status === 'pending' ? 'bg-yellow-500 text-white' : (selectedOrder.status === 'cancelled' ? 'bg-gray-300' : 'bg-green-500 text-white')}`}>
+                            <Check className="h-3 w-3" />
+                          </div>
+                          <span className="font-medium">Order Received</span>
+                          <span className="ml-auto text-gray-500">{formatDate(selectedOrder.createdAt)}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-xs">
+                          <div className={`w-5 h-5 rounded-full mr-2 flex items-center justify-center ${selectedOrder.status === 'pending' ? 'bg-gray-300' : (selectedOrder.status === 'cancelled' ? 'bg-gray-300' : 'bg-green-500 text-white')}`}>
+                            {selectedOrder.status !== 'pending' && selectedOrder.status !== 'cancelled' ? <Check className="h-3 w-3" /> : null}
+                          </div>
+                          <span className={selectedOrder.status !== 'pending' && selectedOrder.status !== 'cancelled' ? "font-medium" : "text-gray-500"}>Preparing</span>
+                        </div>
+                        
+                        <div className="flex items-center text-xs">
+                          <div className={`w-5 h-5 rounded-full mr-2 flex items-center justify-center ${selectedOrder.status === 'ready' || selectedOrder.status === 'delivered' ? 'bg-green-500 text-white' : 'bg-gray-300'}`}>
+                            {selectedOrder.status === 'ready' || selectedOrder.status === 'delivered' ? <Check className="h-3 w-3" /> : null}
+                          </div>
+                          <span className={selectedOrder.status === 'ready' || selectedOrder.status === 'delivered' ? "font-medium" : "text-gray-500"}>Ready for Pickup</span>
+                        </div>
+                        
+                        <div className="flex items-center text-xs">
+                          <div className={`w-5 h-5 rounded-full mr-2 flex items-center justify-center ${selectedOrder.status === 'delivered' ? 'bg-green-500 text-white' : 'bg-gray-300'}`}>
+                            {selectedOrder.status === 'delivered' ? <Check className="h-3 w-3" /> : null}
+                          </div>
+                          <span className={selectedOrder.status === 'delivered' ? "font-medium" : "text-gray-500"}>Delivered</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
