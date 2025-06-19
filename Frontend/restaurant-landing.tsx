@@ -211,8 +211,8 @@ export default function RestaurantLanding() {
 
         {/* Location & Hours Section */}
         <section id="location" className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="flex justify-center gap-12 flex-row  md:flex-col">
+          <div className=" px-24">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div>
                 <h2 className="text-4xl font-bold mb-8">Visit Us</h2>
 
