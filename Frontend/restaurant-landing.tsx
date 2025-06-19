@@ -164,13 +164,14 @@ export default function RestaurantLanding() {
 
         {/* About Section */}
         <section id="about" className="py-20 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">              <div>
+          <div className="flex justify-center">
+            <div className="flex gap-10 xs:flex-col sm:flex-row items-center">        
+                    <div className="">
                 <h2 className="text-4xl font-bold mb-6">Our Story</h2>
-                <p className="text-lg text-gray-600 mb-6">
+                <p className="text-lg text-gray-600 mb-6 md:w-[650px]">
                   {settings?.aboutUs || "For over 30 years, we have been serving authentic Italian cuisine in the heart of the city. Our family recipes, passed down through generations, bring the true taste of Italy to your table."}
                 </p>
-                <p className="text-lg text-gray-600 mb-8">
+                <p className="text-lg text-gray-600 mb-8 md:w-[650px]">
                   From our wood-fired pizzas to our handmade pasta, every dish is prepared with love, using only the
                   finest imported ingredients and locally sourced produce.
                 </p>
@@ -192,12 +193,12 @@ export default function RestaurantLanding() {
                   </div>
                 </div>
               </div>
-              <div className="relative">
+              <div className="relative xs:visibility: hidden md:block">
                 <Image
                   src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=2070&auto=format&fit=crop"
                   alt="Chef preparing food"
-                  width={500}
-                  height={600}
+                  width={600}
+                  height={700}
                   className="rounded-lg shadow-2xl"
                 />
               </div>
@@ -211,11 +212,13 @@ export default function RestaurantLanding() {
         {/* Location & Hours Section */}
         <section id="location" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
-            <div className="grid lg:grid-cols-2 gap-12">
+            <div className="flex justify-center gap-12 flex-row  md:flex-col">
               <div>
                 <h2 className="text-4xl font-bold mb-8">Visit Us</h2>
 
-                <div className="space-y-6">                  <div className="flex items-start space-x-4">
+                <div className="flex">     
+                  <div className="flex flex-col justify-center items-start gap-5">        
+                       <div className="flex items-start space-x-4">
                     <MapPin className="h-6 w-6 text-orange-600 mt-1" />
                     <div>
                       <h3 className="font-semibold text-lg">Address</h3>
@@ -243,7 +246,8 @@ export default function RestaurantLanding() {
                       </div>
                     </div>
                   </div>
-
+</div>
+<div className="flex flex-col justify-center items-start gap-5">
                   <div className="flex items-start space-x-4">
                     <Phone className="h-6 w-6 text-orange-600 mt-1" />
                     <div>
@@ -259,12 +263,13 @@ export default function RestaurantLanding() {
                       <p className="text-gray-600">{settings?.email}</p>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>              <div className="bg-gray-300 rounded-lg h-96 flex items-center justify-center overflow-hidden">
                 <Image 
                   src="https://maps.googleapis.com/maps/api/staticmap?center=New+York,NY&zoom=13&size=600x400&maptype=roadmap&markers=color:red%7Clabel:R%7CNew+York,NY&key=YOUR_API_KEY"
                   alt="Restaurant location map"
-                  width={800}
+                  width={600}
                   height={400}
                   className="w-full h-full object-cover"
                 />
