@@ -204,7 +204,7 @@ export default function AdminSettings() {
                     <div className="relative w-32 h-32 border rounded-lg overflow-hidden">
                       {logoPreview ? (
                         <Image
-                          src={logoPreview.startsWith('data:') ? logoPreview : `http://localhost:5000${logoPreview}`}
+                          src={logoPreview.startsWith('data:') ? logoPreview : `${process.env.NEXT_PUBLIC_API_URL}${logoPreview}`}
                           alt="Restaurant Logo"
                           fill
                           className="object-contain"

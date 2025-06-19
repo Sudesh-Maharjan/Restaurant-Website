@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             {settings?.logo ? (
               <div className="relative h-8 w-8 overflow-hidden rounded-full">
                 <Image
-                  src={`http://localhost:5000${settings.logo}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL}${settings.logo}`}
                   alt={settings?.restaurantName || "Restaurant"}
                   fill
                   className="object-cover"

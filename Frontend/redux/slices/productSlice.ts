@@ -21,7 +21,7 @@ interface ProductsState {
 }
 
 // API URL
-const API_URL = 'http://localhost:5000/api/products';
+const API_URL = '/products';
 
 // Async Actions
 export const getProducts = createAsyncThunk(

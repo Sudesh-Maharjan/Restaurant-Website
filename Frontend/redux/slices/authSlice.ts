@@ -37,7 +37,7 @@ interface AuthResponse {
 }
 
 // API URL
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = '/auth';
 
 // Helper function to get token from localStorage
 const getToken = (): string | null => {

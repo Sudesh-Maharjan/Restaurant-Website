@@ -39,7 +39,7 @@ interface OrdersState {
 }
 
 // API URL
-const API_URL = 'http://localhost:5000/api/orders';
+const API_URL = '/orders';
 
 // Async Actions
 export const getOrders = createAsyncThunk(

@@ -338,7 +338,7 @@ export default function AdminOrders() {
                       <div key={index} className="flex items-center space-x-3 py-2 hover:bg-gray-50 px-2 rounded-md transition-colors">
                         <div className="relative h-14 w-14 rounded-md overflow-hidden border border-gray-200">
                           <Image
-                            src={item.image ? (item.image.startsWith('/uploads') ? `http://localhost:5000${item.image}` : item.image) : '/placeholder.svg'}
+                            src={item.image ? (item.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${item.image}` : item.image) : '/placeholder.svg'}
                             alt={item.name}
                             fill
                             className="object-cover"

@@ -50,7 +50,7 @@ const calculateCartTotals = (items: CartItem[]) => {
 };
 
 // API Endpoints
-const API_URL = 'http://localhost:5000/api/orders';
+const API_URL = `${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api'}/orders`;
 
 // Define the checkout thunk with proper typing
 export const checkout = createAsyncThunk<any, any, { state: RootState }>(

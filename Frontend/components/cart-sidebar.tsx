@@ -55,7 +55,7 @@ export function CartSidebar() {
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center space-x-4 p-4 border rounded-lg">
                     <Image
-                      src={item.image.startsWith('/uploads') ? `http://localhost:5000${item.image}` : item.image}
+                      src={item.image.startsWith('/uploads') ? `${process.env.NEXT_PUBLIC_API_URL}${item.image}` : item.image}
                       alt={item.name}
                       width={60}
                       height={60}

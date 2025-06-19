@@ -91,9 +91,8 @@ export function Header() {
           <Link href="/" className="flex items-center space-x-3 group relative">
             <div className="relative">
               {settings?.logo ? (
-                <div className="relative h-12 w-12 overflow-hidden rounded-2xl border-2 border-gradient-to-r from-orange-200 to-orange-300 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">
-                  <Image
-                    src={`http://localhost:5000${settings.logo}`}
+                <div className="relative h-12 w-12 overflow-hidden rounded-2xl border-2 border-gradient-to-r from-orange-200 to-orange-300 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:scale-105">                  <Image
+                    src={`${process.env.NEXT_PUBLIC_API_URL}${settings.logo}`}
                     alt={settings?.restaurantName || "Restaurant"}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -280,9 +279,8 @@ export function Header() {
                       className="flex items-center space-x-3 group"
                     >
                       {settings?.logo ? (
-                        <div className="relative h-10 w-10 overflow-hidden rounded-xl border-2 border-orange-200">
-                          <Image
-                            src={`http://localhost:5000${settings.logo}`}
+                        <div className="relative h-10 w-10 overflow-hidden rounded-xl border-2 border-orange-200">                          <Image
+                            src={`${process.env.NEXT_PUBLIC_API_URL}${settings.logo}`}
                             alt={settings?.restaurantName || "Restaurant"}
                             fill
                             className="object-cover"
