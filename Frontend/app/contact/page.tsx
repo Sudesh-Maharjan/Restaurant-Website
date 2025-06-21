@@ -12,9 +12,9 @@ export default function ContactPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
         {/* Hero Section */}
-        <section className="relative py-20 bg-gradient-to-r from-orange-600 to-orange-700 text-white overflow-hidden">
+        <section className="relative py-20 bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-800 dark:to-orange-900 text-white overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full translate-y-32 -translate-x-32" />

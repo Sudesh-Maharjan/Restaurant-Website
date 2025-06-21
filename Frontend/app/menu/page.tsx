@@ -124,9 +124,9 @@ export default function MenuPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
         {/* Hero Section */}
-        <section className="relative py-16 bg-gradient-to-r from-orange-600 to-orange-700 text-white overflow-hidden">
+        <section className="relative py-16 bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-800 dark:to-orange-900 text-white overflow-hidden">
           <div className="absolute inset-0 bg-black/20" />
           <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-48 translate-x-48" />
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full translate-y-32 -translate-x-32" />
@@ -161,18 +161,17 @@ export default function MenuPage() {
         </section>        <div className="container mx-auto px-4 py-8">
           {/* Menu File Display */}
           {menuFile?.url && (
-            <div className="max-w-4xl mx-auto mb-12">
-              <Card className="border-0 shadow-2xl">
-                <CardHeader className="text-center bg-gradient-to-r from-gray-50 to-gray-100">
-                  <CardTitle className="flex items-center justify-center space-x-2">
+            <div className="max-w-4xl mx-auto mb-12">              <Card className="border-0 shadow-2xl dark:bg-gray-800 dark:border-gray-700">
+                <CardHeader className="text-center bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
+                  <CardTitle className="flex items-center justify-center space-x-2 dark:text-white">
                     {menuFile.type === "pdf" ? (
-                      <FileText className="h-6 w-6 text-red-600" />
+                      <FileText className="h-6 w-6 text-red-600 dark:text-red-400" />
                     ) : (
-                      <ImageIcon className="h-6 w-6 text-blue-600" />
+                      <ImageIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     )}
                     <span>Official Restaurant Menu</span>
                   </CardTitle>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-gray-300">
                     Uploaded on {menuFile.uploadedAt ? new Date(menuFile.uploadedAt).toLocaleDateString() : 'Unknown date'}
                   </p>
                 </CardHeader>
@@ -223,26 +222,24 @@ export default function MenuPage() {
                     </div>
                   )}
                 </CardContent>
-              </Card>
-
-              <div className="flex items-center my-12">
-                <div className="flex-1 border-t border-gray-300"></div>
-                <div className="px-6 text-gray-500 font-medium">OR BROWSE BY CATEGORY</div>
-                <div className="flex-1 border-t border-gray-300"></div>
+              </Card>              <div className="flex items-center my-12">
+                <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+                <div className="px-6 text-gray-500 dark:text-gray-400 font-medium">OR BROWSE BY CATEGORY</div>
+                <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
               </div>
             </div>
           )}
 
           {/* Search and Filter Section */}
           <div className="max-w-7xl mx-auto mb-8">
-            <Card className="border-0 shadow-lg">
+            <Card className="border-0 shadow-lg dark:bg-gray-800 dark:border-gray-700">
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6 items-center">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <Input
                       placeholder="Search dishes, ingredients, or descriptions..."
-                      className="pl-10 h-12 border-gray-200 focus:border-orange-500 focus:ring-orange-500"
+                      className="pl-10 h-12 border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-white focus:border-orange-500 focus:ring-orange-500"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />

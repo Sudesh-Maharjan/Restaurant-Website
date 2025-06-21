@@ -163,7 +163,7 @@ export default function RestaurantLanding() {
         </section>
 
         {/* About Section */}
-        <section id="about" className="py-20 bg-gray-50">
+        <section id="about" className="py-20 bg-gray-50 dark:bg-gray-900">
           <div className="flex justify-center">
             <div className="flex gap-10 xs:flex-col sm:flex-row items-center">        
                     <div className="">
@@ -210,174 +210,191 @@ export default function RestaurantLanding() {
         <MenuSection />
 
         {/* Location & Hours Section */}
-        <section id="location" className="py-20 bg-gray-50">
-          <div className=" px-24">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-              <div>
-                <h2 className="text-4xl font-bold mb-8">Visit Us</h2>
+        <section id="location" className="py-20 bg-orange-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900 dark:text-white">Visit Us</h2>
+            <div className="h-1 w-24 bg-orange-500 mx-auto"></div>
+          </div>
 
-                <div className="flex">     
-                  <div className="flex flex-col justify-center items-start gap-5">        
-                       <div className="flex items-start space-x-4">
-                    <MapPin className="h-6 w-6 text-orange-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-lg">Address</h3>
-                      <p className="text-gray-600">
-                        {settings?.address}
-                        <br />
-                        {/* {settings?.city}, {settings?.state} {settings?.zipCode} */}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <Clock className="h-6 w-6 text-orange-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-lg">Hours</h3>
-                      <div className="text-gray-600 space-y-1">
-                        {settings?.hours ? (
-                          <>
-                            <p>Monday - Friday: {settings.hours.monFri}</p>
-                            <p>Saturday - Sunday: {settings.hours.satSun}</p>
-                          </>
-                        ) : (
-                          <p>{settings?.openingHours}</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-</div>
-<div className="flex flex-col justify-center items-start gap-5">
-                  <div className="flex items-start space-x-4">
-                    <Phone className="h-6 w-6 text-orange-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-lg">Phone</h3>
-                      <p className="text-gray-600">{settings?.phone}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start space-x-4">
-                    <Mail className="h-6 w-6 text-orange-600 mt-1" />
-                    <div>
-                      <h3 className="font-semibold text-lg">Email</h3>
-                      <p className="text-gray-600">{settings?.email}</p>
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            {/* Map */}
+            <div className="rounded-2xl overflow-hidden shadow-lg h-[300px] md:h-[400px] bg-white dark:bg-gray-800 order-2 md:order-1">
+              <div className="h-full w-full relative">
+                <Image
+                  src="https://images.unsplash.com/photo-1524282540044-f50dafd5b8f9?q=80&w=1400&auto=format&fit=crop"
+                  alt="Restaurant Location"
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-6">
+                  <div className="text-white">
+                    <h3 className="font-bold text-xl mb-2">Find Us</h3>
+                    <p className="text-sm">
+                      {settings?.address}, {settings?.city}, {settings?.state} {settings?.zipCode}
+                    </p>
                   </div>
                 </div>
-              </div>    
-                        <div className="rounded-lg h-96 flex items-center justify-center overflow-hidden">
-               <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d56516.277781717035!2d85.28484722733138!3d27.709030216300327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb198a307baabf%3A0xb5137c1bf18db1ea!2sKathmandu%2044600!5e0!3m2!1sen!2snp!4v1750304754803!5m2!1sen!2snp" width="600" height="450" loading="lazy" ></iframe>
+              </div>
+            </div>
+
+            {/* Location & Hours */}
+            <div className="space-y-4 md:space-y-8 order-1 md:order-2">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-lg">
+                <div className="flex items-start">
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mr-3 md:mr-4 flex-shrink-0">
+                    <MapPin className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 md:mb-2 text-gray-900 dark:text-white">Our Location</h3>
+                    <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
+                      {settings?.address}<br />
+                      {settings?.city}, {settings?.state} {settings?.zipCode}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-lg">
+                <div className="flex items-start">
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mr-3 md:mr-4 flex-shrink-0">
+                    <Clock className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 md:mb-2 text-gray-900 dark:text-white">Opening Hours</h3>
+                    {settings?.hours ? (
+                      <div className="space-y-1 text-sm md:text-base text-gray-700 dark:text-gray-300">
+                        {Object.entries(settings.hours).map(([day, hours]) => (
+                          <p key={day}>
+                            <span className="font-medium">{day}:</span> {hours}
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
+                        {settings?.openingHours || "Monday-Friday: 8am-10pm\nSaturday-Sunday: 9am-11pm"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 md:p-6 shadow-lg">
+                <div className="flex items-start">
+                  <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 mr-3 md:mr-4 flex-shrink-0">
+                    <Phone className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg md:text-xl mb-1 md:mb-2 text-gray-900 dark:text-white">Contact</h3>
+                    <p className="text-sm md:text-base text-gray-700 dark:text-gray-300">
+                      Phone: {settings?.phone || "(555) 123-4567"}<br />
+                      Email: {settings?.email || "info@bellavista.com"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
- {/* Reservation Section */}
-        <section id="contact" className="py-20 bg-gradient-to-br from-orange-50 via-white to-orange-50">
+        </div>
+      </section> {/* Reservation Section */}
+        <section id="reserve-table" className="py-20 bg-gradient-to-br from-orange-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               {/* Section Header */}
               <div className="text-center mb-16">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 rounded-full mb-6">
-                  <ChefHat className="h-8 w-8 text-orange-600" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-orange-100 dark:bg-gray-800 rounded-full mb-6">
+                  <ChefHat className="h-8 w-8 text-orange-600 dark:text-orange-400" />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">Reserve Your Table</h2>
-                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white">Reserve Your Table</h2>
+                <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
                   Secure your spot for an unforgettable Italian dining experience. Our team will confirm your
                   reservation within 2 hours.
                 </p>
               </div>
 
               <div className="grid lg:grid-cols-5 gap-12 items-start">
-                {/* Reservation Benefits */}
-                <div className="lg:col-span-2 space-y-8">
+                {/* Reservation Benefits */}                <div className="lg:col-span-2 space-y-8">
                   <div>
-                    <h3 className="text-2xl font-bold mb-6 text-gray-900">Why Reserve With Us?</h3>
+                    <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Why Reserve With Us?</h3>
 
                     <div className="space-y-6">
                       <div className="flex items-start space-x-4">
-                        <div className="bg-green-100 rounded-full p-2 mt-1">
-                          <Star className="h-5 w-5 text-green-600" />
+                        <div className="bg-green-100 dark:bg-green-900/40 rounded-full p-2 mt-1">
+                          <Star className="h-5 w-5 text-green-600 dark:text-green-400" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Priority Seating</h4>
-                          <p className="text-gray-600 text-sm">Skip the wait with guaranteed table availability</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Priority Seating</h4>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">Skip the wait with guaranteed table availability</p>
                         </div>
                       </div>
 
                       <div className="flex items-start space-x-4">
-                        <div className="bg-blue-100 rounded-full p-2 mt-1">
-                          <Users className="h-5 w-5 text-blue-600" />
+                        <div className="bg-blue-100 dark:bg-blue-900/40 rounded-full p-2 mt-1">
+                          <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Perfect Table</h4>
-                          <p className="text-gray-600 text-sm">We'll select the best table for your party size</p>
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Perfect Table</h4>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">We'll select the best table for your party size</p>
                         </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="bg-purple-100 rounded-full p-2 mt-1">
-                          <Award className="h-5 w-5 text-purple-600" />
+                      </div>                      <div className="flex items-start space-x-4">
+                        <div className="bg-purple-100 dark:bg-purple-900/40 rounded-full p-2 mt-1">
+                          <Award className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Special Occasions</h4>
-                          <p className="text-gray-600 text-sm">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Special Occasions</h4>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
                             Let us know about birthdays, anniversaries, or celebrations
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-start space-x-4">
-                        <div className="bg-orange-100 rounded-full p-2 mt-1">
-                          <Clock className="h-5 w-5 text-orange-600" />
+                        <div className="bg-orange-100 dark:bg-orange-900/40 rounded-full p-2 mt-1">
+                          <Clock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-1">Flexible Timing</h4>
-                          <p className="text-gray-600 text-sm">
+                          <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Flexible Timing</h4>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
                             Easy rescheduling up to 2 hours before your reservation
                           </p>
                         </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Popular Times */}
-                  <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <h4 className="font-semibold text-gray-900 mb-4">Popular Reservation Times</h4>
+                  </div>                  {/* Popular Times */}
+                  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-100 dark:border-gray-700">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Popular Reservation Times</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Lunch (12:00 - 2:00 PM)</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Lunch (12:00 - 2:00 PM)</span>
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-gray-200 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-400 dark:bg-green-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-green-400 dark:bg-green-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-gray-200 dark:bg-gray-600 rounded-full"></div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Early Dinner (5:00 - 6:30 PM)</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Early Dinner (5:00 - 6:30 PM)</span>
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-yellow-400 dark:bg-yellow-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-yellow-400 dark:bg-yellow-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-yellow-400 dark:bg-yellow-500 rounded-full"></div>
                         </div>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Prime Dinner (7:00 - 9:00 PM)</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-300">Prime Dinner (7:00 - 9:00 PM)</span>
                         <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                          <div className="w-2 h-2 bg-red-400 rounded-full"></div>
+                          <div className="w-2 h-2 bg-red-400 dark:bg-red-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-red-400 dark:bg-red-500 rounded-full"></div>
+                          <div className="w-2 h-2 bg-red-400 dark:bg-red-500 rounded-full"></div>
                         </div>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-3">🟢 Available • 🟡 Limited • 🔴 High Demand</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">🟢 Available • 🟡 Limited • 🔴 High Demand</p>
                   </div>
-                </div>
-
-                {/* Reservation Form */}
+                </div>                {/* Reservation Form */}
                 <div className="lg:col-span-3">
-                  <Card className="border-0 shadow-2xl bg-white overflow-hidden">
-                    <div className="bg-gradient-to-r from-orange-600 to-orange-700 p-6 text-white">
+                  <Card className="border-0 shadow-2xl bg-white dark:bg-gray-800 overflow-hidden">
+                    <div className="bg-gradient-to-r from-orange-600 to-orange-700 dark:from-orange-700 dark:to-orange-800 p-6 text-white">
                       <div className="flex items-center justify-between">
                         <div>
                           <h3 className="text-2xl font-bold">Book Your Table</h3>

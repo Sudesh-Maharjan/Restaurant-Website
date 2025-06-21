@@ -7,6 +7,7 @@ import { RestaurantProvider } from "../contexts/restaurant-context"
 import { ReduxProvider } from "../redux/provider"
 import WebSocketProvider from "@/components/websocket-provider"
 import DynamicTitle from "@/components/dynamic-title"
+import { ThemeProvider } from "@/components/theme-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -23,20 +24,21 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
-}) {
-  return (
-    <html lang="en">
+}) {  return (
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ReduxProvider>
-          <WebSocketProvider>
-            <RestaurantProvider>
-              <CartProvider>
-                <DynamicTitle />
-                {children}
-              </CartProvider>
-            </RestaurantProvider>
-          </WebSocketProvider>
-        </ReduxProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <ReduxProvider>
+            <WebSocketProvider>
+              <RestaurantProvider>
+                <CartProvider>
+                  <DynamicTitle />
+                  {children}
+                </CartProvider>
+              </RestaurantProvider>
+            </WebSocketProvider>
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   )
