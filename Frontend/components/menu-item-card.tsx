@@ -80,9 +80,8 @@ export function MenuItemCard({
         )}
       </div>
       <CardHeader className="pb-2">
-        <CardTitle className="flex justify-between items-start">
-          <span className="text-lg">{name}</span>
-          <Price value={price} className="text-orange-600 font-bold text-lg" />
+        <CardTitle className="flex justify-between items-start">          <span className="text-lg">{name}</span>
+          <Price amount={price} className="text-orange-600 font-bold text-lg" />
         </CardTitle>
         <CardDescription className="text-sm leading-relaxed">{description}</CardDescription>
       </CardHeader>

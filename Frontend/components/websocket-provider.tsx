@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import webSocketService from '@/services/websocket';
 import { addOrderViaWebSocket, updateOrderViaWebSocket } from '@/redux/slices/orderSlice';
-import { addNotification } from '@/redux/slices/notificationSlice';
+import { addNotification, fetchNotifications } from '@/redux/slices/notificationSlice';
 import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,6 +17,13 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
   const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    if (user?._id) {
+      // Fetch notifications when user logs in
+      dispatch(fetchNotifications());
+    }
+  }, [dispatch, user?._id]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -73,41 +80,44 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
             description: 'Your order has been received by the restaurant',
             variant: 'default',
           });
-        }
-      } else if (data.event === 'statusUpdated') {
+        }      } else if (data.event === 'statusUpdated') {
         dispatch(updateOrderViaWebSocket(data.order));
         
-        // Status message mapping
-        const statusMessages: Record<string, string> = {
-          pending: 'Your order has been received',
-          preparing: 'Your order is being prepared',
-          ready: 'Your order is ready for pickup/delivery',
-          delivered: 'Your order has been delivered',
-          cancelled: 'Your order has been cancelled'
-        };
+        // Use custom notification message if provided by backend, otherwise use default
+        let notificationTitle = 'Order Status Updated';
+        let notificationMessage = `Order #${data.order.orderNumber || data.order._id.substr(-6)} status: ${data.order.status}`;
+        
+        if (data.notification) {
+          notificationTitle = data.notification.title || notificationTitle;
+          notificationMessage = data.notification.message || notificationMessage;
+        }
         
         // Create notification for status update
         const notificationId = uuidv4();
         const notification = {
           id: notificationId,
-          title: 'Order Status Updated',
-          message: statusMessages[data.order.status] || `Status: ${data.order.status}`,
+          title: notificationTitle,
+          message: notificationMessage,
           type: 'status_update' as const,
+          status: data.order.status, // Add status to the notification for appropriate icon display
           isRead: false,
           orderId: data.order._id,
           timestamp: new Date().toISOString(),
         };
+          dispatch(addNotification(notification));
         
-        dispatch(addNotification(notification));
+        // Show toast notification with appropriate styling based on status
+        let toastVariant: 'default' | 'destructive' | undefined = 'default';
         
-        // Show toast notification for customer
-        if (user?.role !== 'admin') {
-          toast({
-            title: 'Order Status Updated',
-            description: statusMessages[data.order.status] || `Status: ${data.order.status}`,
-            variant: 'default',
-          });
+        if (data.order.status === 'cancelled') {
+          toastVariant = 'destructive';
         }
+        
+        toast({
+          title: notificationTitle,
+          description: notificationMessage,
+          variant: toastVariant,
+        });
       }
     };
 

@@ -105,7 +105,7 @@ export default function CartPage() {
                           <h3 className="font-medium">{item.name}</h3>
                           <p className="text-sm text-gray-500">{item.description}</p>
                           <p className="text-orange-600 font-semibold mt-1">
-                            <Price value={item.price} />
+                            <Price amount={item.price} />
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">

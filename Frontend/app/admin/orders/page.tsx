@@ -256,8 +256,7 @@ export default function AdminOrders() {
                   const StatusIcon = statusIcons[order.status] || Clock;
                   return (
                     <TableRow key={order._id}>
-                      <TableCell className="font-medium">{order._id.slice(-8)}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium">{order._id.slice(-8)}</TableCell>                      <TableCell>
                         <div>
                           <div className="font-medium">{order.customer?.name || 'Guest'}</div>
                           <div className="text-sm text-gray-500">{order.email || order.customer?.email || 'No email'}</div>
@@ -265,7 +264,7 @@ export default function AdminOrders() {
                       </TableCell>
                       <TableCell>{order.phone || order.customer?.phone || 'No phone'}</TableCell>
                       <TableCell>
-                        <Price value={order.total} />
+                        <Price amount={order.total} />
                       </TableCell>
                       <TableCell>
                         {order.paid ? (
@@ -347,25 +346,23 @@ export default function AdminOrders() {
                         <div className="flex-1">
                           <div className="font-medium text-gray-800">{item.name}</div>
                           <div className="text-sm text-gray-500">
-                            <Price value={item.price} /> x {item.quantity}
+                            <Price amount={item.price} /> x {item.quantity}
                           </div>
                         </div>
                         <div className="font-semibold text-gray-900">
-                          <Price value={item.price * item.quantity} />
+                          <Price amount={item.price * item.quantity} />
                         </div>
                       </div>
                     ))}
                   </div>
 
                   <div className="pt-3 border-t space-y-2">
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>Subtotal</span>
-                      <Price value={selectedOrder.total} />
+                    <div className="flex justify-between text-sm text-gray-600">                      <span>Subtotal</span>
+                      <Price amount={selectedOrder.total} />
                     </div>
-                    <div className="flex justify-between font-semibold text-gray-900">
-                      <span>Total</span>
+                    <div className="flex justify-between font-semibold text-gray-900">                      <span>Total</span>
                       <span className="text-orange-600">
-                        <Price value={selectedOrder.total} />
+                        <Price amount={selectedOrder.total} />
                       </span>
                     </div>
                   </div>

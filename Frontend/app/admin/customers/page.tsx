@@ -113,9 +113,23 @@ export default function AdminCustomers() {
       (customer.phone && customer.phone.toLowerCase().includes(searchLower))
     )
   })
-
   const getCustomerOrders = (customerId: string) => {
-    return orders.filter((order) => order.customer._id === customerId)
+    return orders.filter((order) => order.customer?._id === customerId);
+  }
+
+  const calculateCustomerStats = (customerId: string) => {
+    const customerOrders = getCustomerOrders(customerId);
+    const totalOrders = customerOrders.length;
+    const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0);
+    const lastOrderDate = customerOrders.length > 0 
+      ? new Date(customerOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0].createdAt)
+      : null;
+    
+    return {
+      totalOrders,
+      totalSpent,
+      lastOrderDate
+    };
   }
 
   const getCustomerTier = (totalSpent: number) => {
@@ -337,7 +351,8 @@ export default function AdminCustomers() {
               </TableHeader>
               <TableBody>
                 {filteredCustomers.map((customer) => {
-                  const customerTier = getCustomerTier(customer.totalSpent)
+                  const stats = calculateCustomerStats(customer._id);
+                  const customerTier = getCustomerTier(stats.totalSpent);
                   return (
                     <TableRow key={customer._id}>
                       <TableCell>
@@ -357,14 +372,13 @@ export default function AdminCustomers() {
                             {customer.phone || 'No phone provided'}
                           </div>
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </TableCell>                      <TableCell>
                         <Badge className={customerTier.color}>{customerTier.tier}</Badge>
                       </TableCell>
-                      <TableCell className="font-medium">{customer.totalOrders}</TableCell>
-                      <TableCell className="font-medium text-green-600">{formatPrice(customer.totalSpent, currency)}</TableCell>
-                      <TableCell>{formatDate(customer.joinedDate)}</TableCell>
-                      <TableCell>{formatDate(customer.lastOrderDate)}</TableCell>
+                      <TableCell className="font-medium">{stats.totalOrders}</TableCell>
+                      <TableCell className="font-medium text-green-600">{formatPrice(stats.totalSpent, currency)}</TableCell>
+                      <TableCell>{formatDate(customer.joinedDate || new Date().toISOString())}</TableCell>
+                      <TableCell>{stats.lastOrderDate ? formatDate(stats.lastOrderDate.toISOString()) : 'No orders'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end space-x-1">
                           <Button variant="outline" size="sm" onClick={() => {
@@ -428,27 +442,34 @@ export default function AdminCustomers() {
                       <strong>Address:</strong> {selectedCustomer.address || 'No address provided'}
                     </p>
                   </div>
-                  <div>
-                    <h4 className="font-semibold mb-2">Customer Stats</h4>
-                    <p>
-                      <strong>Total Orders:</strong> {selectedCustomer.totalOrders}
-                    </p>
-                    <p>
-                      <strong>Total Spent:</strong> {formatPrice(selectedCustomer.totalSpent, currency)}
-                    </p>
-                    <p>
-                      <strong>Avg Order:</strong> {
-                        selectedCustomer.totalOrders > 0
-                          ? formatPrice(selectedCustomer.totalSpent / selectedCustomer.totalOrders, currency)
-                          : formatPrice(0, currency)
-                      }
-                    </p>
-                    <p>
-                      <strong>Tier:</strong>{" "}
-                      <Badge className={getCustomerTier(selectedCustomer.totalSpent).color}>
-                        {getCustomerTier(selectedCustomer.totalSpent).tier}
-                      </Badge>
-                    </p>
+                  <div>                    <h4 className="font-semibold mb-2">Customer Stats</h4>
+                    {(() => {
+                      const stats = calculateCustomerStats(selectedCustomer._id);
+                      const customerTier = getCustomerTier(stats.totalSpent);
+                      return (
+                        <>
+                          <p>
+                            <strong>Total Orders:</strong> {stats.totalOrders}
+                          </p>
+                          <p>
+                            <strong>Total Spent:</strong> {formatPrice(stats.totalSpent, currency)}
+                          </p>
+                          <p>
+                            <strong>Avg Order:</strong> {
+                              stats.totalOrders > 0
+                                ? formatPrice(stats.totalSpent / stats.totalOrders, currency)
+                                : formatPrice(0, currency)
+                            }
+                          </p>
+                          <p>
+                            <strong>Tier:</strong>{" "}
+                            <Badge className={customerTier.color}>
+                              {customerTier.tier}
+                            </Badge>
+                          </p>
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
 
@@ -469,10 +490,9 @@ export default function AdminCustomers() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">{formatPrice(order.total, currency)}</p>
-                            <Badge
+                            <p className="font-medium">{formatPrice(order.total, currency)}</p>                            <Badge
                               className={`text-xs ${
-                                order.status === "completed"
+                                order.status === "delivered" || order.status === "ready"
                                   ? "bg-green-100 text-green-800"
                                   : order.status === "cancelled"
                                     ? "bg-red-100 text-red-800"

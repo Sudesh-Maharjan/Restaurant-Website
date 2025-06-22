@@ -68,14 +68,22 @@ export const register = createAsyncThunk<AuthResponse, RegisterCredentials>(
   'auth/register',
   async (credentials, { rejectWithValue }) => {
     try {
+      console.log('Making register API call with credentials:', credentials);
       const response = await api.post(`${API_URL}/register`, credentials);
+      console.log('Register API response:', response.data);
       
       // Store token in localStorage
       localStorage.setItem('token', response.data.token);
       
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Registration failed');
+      console.error('Register API error:', error.response?.data || error.message);
+      return rejectWithValue(
+        error.response?.data?.message || 
+        (error.response?.data?.error && typeof error.response.data.error === 'string' 
+          ? error.response.data.error 
+          : 'Registration failed. Please check your information and try again.')
+      );
     }
   }
 );

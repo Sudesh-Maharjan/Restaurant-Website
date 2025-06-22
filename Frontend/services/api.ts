@@ -14,9 +14,12 @@ const api = axios.create({
 // Add request interceptor to include auth token
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Only access localStorage on the client side
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -27,11 +30,25 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('API Error:', error);
+    
     // Handle 401 Unauthorized error
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/auth';
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth';
+      }
     }
+    
+    // Network errors handling
+    if (!error.response) {
+      error.response = {
+        data: {
+          message: 'Network error. Please check your internet connection and try again.'
+        }
+      };
+    }
+    
     return Promise.reject(error);
   }
 );

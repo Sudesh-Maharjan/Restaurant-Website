@@ -140,9 +140,8 @@ export function MenuItemCardEnhanced({
 
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start">
-            <CardTitle className="text-lg leading-tight">{name}</CardTitle>
-            <span className="text-orange-600 font-bold text-lg ml-2">
-              <Price value={price} />
+            <CardTitle className="text-lg leading-tight">{name}</CardTitle>            <span className="text-orange-600 font-bold text-lg ml-2">
+              <Price amount={price} />
             </span>
           </div>
 
@@ -203,9 +202,8 @@ export function MenuItemCardEnhanced({
                 <Image src={image || "/placeholder.svg"} alt={name} fill className="object-cover" />
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-3xl font-bold text-orange-600">
-                  <Price value={price} />
+              <div className="flex items-center justify-between">                <span className="text-3xl font-bold text-orange-600">
+                  <Price amount={price} />
                 </span>
                 <div className="flex items-center space-x-2">
                   <Star className="h-5 w-5 text-yellow-500 fill-current" />
@@ -281,7 +279,7 @@ export function MenuItemCardEnhanced({
 
                 <div className="flex items-center space-x-4">
                   <span className="text-xl font-bold text-orange-600">
-                    <Price value={price * quantity} />
+                    <Price amount={price * quantity} />
                   </span>                  <Button
                     onClick={() => addToCartHandler(quantity)}
                     disabled={!isAvailable}

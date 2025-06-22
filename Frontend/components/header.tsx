@@ -152,12 +152,11 @@ export function Header() {
                     </Badge>
                   )}
                 </Button>
-              </Link>
-
-              {/* User Menu or Login */}
+              </Link>              {/* User Menu or Login */}
               {isAuthenticated && user ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>                  <Button
+                  <DropdownMenuTrigger asChild>
+                    <Button
                       variant="ghost"
                       size="sm"
                       className="relative h-11 w-11 rounded-2xl overflow-hidden border-2 border-orange-100 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-600 transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 group"
@@ -168,9 +167,10 @@ export function Header() {
                           {user.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-500/0 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </Button>
-                  </DropdownMenuTrigger>                <DropdownMenuContent
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-500/0 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>                    </Button>
+                  </DropdownMenuTrigger>
+                  
+                  <DropdownMenuContent
                     align="end"
                     className="w-64 p-3 border border-orange-100/50 dark:border-gray-700/50 shadow-2xl shadow-orange-500/10 dark:shadow-gray-900/20 animate-in slide-in-from-top-5 duration-300 rounded-2xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl"
                   >
@@ -301,7 +301,7 @@ export function Header() {
                       <X className="h-5 w-5" />
                     </Button>
                   </div>                  {/* Mobile Cart Info */}
-                  <div className="px-6 py-4 border-b border-orange-100/50 dark:border-gray-700/50 flex items-center">
+                  <div className="px-6 py-4 border-b border-orange-100/50 dark:border-gray-700/50 flex items-center space-x-2">
                     <Link href="/cart" onClick={() => setMobileMenuOpen(false)}>
                       <Button
                         variant="ghost"
@@ -316,6 +316,12 @@ export function Header() {
                         )}
                       </Button>
                     </Link>
+                    
+                    {isAuthenticated && (
+                      <div className="lg:hidden">
+                        <NotificationDropdown />
+                      </div>
+                    )}
                   </div>
 
                   {/* Mobile Navigation */}
@@ -375,7 +381,11 @@ export function Header() {
                             </div>
                             <span>My Orders</span>
                           </Link>                          <div className="relative w-full">
-                            <div className="flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors">
+                            <Link 
+                              href="/orders" 
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="flex items-center space-x-3 px-4 py-3 text-sm font-medium rounded-xl hover:bg-orange-50 dark:hover:bg-gray-800 transition-colors"
+                            >
                               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
                                 <Bell className="h-4 w-4" />
                               </div>
@@ -385,7 +395,7 @@ export function Header() {
                                   {unreadCount}
                                 </Badge>
                               )}
-                            </div>
+                            </Link>
                           </div>
 
                           {user.role === "admin" && (

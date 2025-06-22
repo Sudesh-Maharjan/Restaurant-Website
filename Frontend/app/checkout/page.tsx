@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Separator } from "@/components/ui/separator"
@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector, selectAuth, selectCart } from "@/redux/
 import { clearCart } from "@/redux/slices/cartSlice"
 import { createCustomer } from "@/redux/slices/customerSlice"
 import { createOrder } from "@/redux/slices/orderSlice"
+import { addNotification } from "@/redux/slices/notificationSlice"
 import { useToast } from "@/components/ui/use-toast"
 import { formatPrice } from "@/lib/currency"
 
@@ -29,8 +30,8 @@ export default function CheckoutPage() {
   const currency = settings?.currency || 'USD'
   const { toast } = useToast()
   
-  const [orderType, setOrderType] = useState("delivery") // delivery or pickup
-  const [paymentMethod, setPaymentMethod] = useState("card") // card or cash
+  const [orderType, setOrderType] = useState("pickup") // Pickup only
+  const [paymentMethod, setPaymentMethod] = useState("cash") // Cash only
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [formData, setFormData] = useState({
@@ -38,23 +39,24 @@ export default function CheckoutPage() {
     lastName: user?.name?.split(" ")[1] || "",
     email: user?.email || "",
     phone: user?.phone || "",
+    pickupDate: new Date().toISOString().split("T")[0],
+    pickupTime: "12:00",
+    // Include empty fields for backward compatibility
     address: "",
     city: "",
     state: "",
     zipCode: "",
     deliveryInstructions: "",
-    pickupDate: new Date().toISOString().split("T")[0],
-    pickupTime: "12:00",
     cardNumber: "",
     expiryDate: "",
     cvv: "",
-    cardholderName: "",
+    cardholderName: ""
   })
   
-  // Calculate order total
-  const deliveryFee = orderType === "delivery" ? 4.99 : 0
+  // Calculate order total - no delivery fee
+  const deliveryFee = 0 // Keep for backward compatibility
   const tax = cartState.total * 0.08
-  const finalTotal = cartState.total + deliveryFee + tax
+  const finalTotal = cartState.total + tax
 
   // Redirect to cart if not authenticated
   useEffect(() => {
@@ -78,31 +80,12 @@ export default function CheckoutPage() {
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-      // Validate form based on order type and payment method
+    
+    // Validate form - only phone is required now
     if (!formData.phone) {
       toast({
         title: "Missing Information",
         description: "Please provide a phone number",
-        variant: "destructive"
-      })
-      setIsSubmitting(false)
-      return
-    }
-    
-    if (orderType === "delivery" && (!formData.address || !formData.city || !formData.state || !formData.zipCode)) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all delivery address fields",
-        variant: "destructive"
-      })
-      setIsSubmitting(false)
-      return
-    }
-    
-    if (paymentMethod === "card" && (!formData.cardNumber || !formData.expiryDate || !formData.cvv || !formData.cardholderName)) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all payment details",
         variant: "destructive"
       })
       setIsSubmitting(false)
@@ -119,9 +102,10 @@ export default function CheckoutPage() {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           phone: formData.phone,
-          address: formData.address || "",
+          address: "" // Empty address is fine for pickup-only
         }
-          const customerResult = await dispatch(createCustomer(customerData)).unwrap()
+        
+        const customerResult = await dispatch(createCustomer(customerData)).unwrap()
         customerId = customerResult._id
       }
       
@@ -137,13 +121,15 @@ export default function CheckoutPage() {
         })),
         total: finalTotal,
         status: "pending",
-        address: formData.address || "Pickup in store",
-        phone: formData.phone, // Make sure this is included        email: formData.email,
-        notes: formData.deliveryInstructions || "",
-        paymentMethod: paymentMethod,
-        paid: paymentMethod === "card" // Mark as paid if using card
+        address: "Pickup in store", // Always pickup
+        phone: formData.phone,
+        email: formData.email,
+        notes: `Pickup date: ${formData.pickupDate}, time: ${formData.pickupTime}`,
+        paymentMethod: "cash", // Always cash on pickup
+        paid: false // Always marked as unpaid since it's cash on pickup
       }
-        await dispatch(createOrder(orderData)).unwrap()
+        
+      await dispatch(createOrder(orderData)).unwrap()
       
       // Clear cart
       dispatch(clearCart())
@@ -158,10 +144,24 @@ export default function CheckoutPage() {
       // Play notification sound
       try {
         const audio = new Audio('/notification.mp3');
-        audio.volume = 0.7; // Reduce volume slightly
+        audio.volume = 0.7;
         audio.play().catch(err => console.error('Error playing notification sound:', err));
       } catch (err) {
         console.error('Error playing notification sound:', err);
+      }
+      
+      // Manually create notification in case WebSocket fails
+      if (user) {
+        const { v4: uuidv4 } = await import('uuid');
+        const notificationId = uuidv4();
+        dispatch(addNotification({
+          id: notificationId,
+          title: 'Order Placed',
+          message: 'Your order has been received by the restaurant',
+          type: 'order_placed',
+          isRead: false,
+          timestamp: new Date().toISOString(),
+        }));
       }
       
       // Trigger a custom order placed event (as a backup in case WebSocket fails)
@@ -226,8 +226,7 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmitOrder}>
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Order Form */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Order Type */}
+            <div className="lg:col-span-2 space-y-6">              {/* Order Type - Pickup Only */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -236,23 +235,16 @@ export default function CheckoutPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     <Button
                       type="button"
-                      variant={orderType === "delivery" ? "default" : "outline"}
-                      onClick={() => setOrderType("delivery")}
-                      className={orderType === "delivery" ? "bg-orange-600 hover:bg-orange-700" : ""}
+                      variant="default"
+                      className="bg-orange-600 hover:bg-orange-700"
+                      disabled
                     >
-                      Delivery
+                      Pickup Only
                     </Button>
-                    <Button
-                      type="button"
-                      variant={orderType === "pickup" ? "default" : "outline"}
-                      onClick={() => setOrderType("pickup")}
-                      className={orderType === "pickup" ? "bg-orange-600 hover:bg-orange-700" : ""}
-                    >
-                      Pickup
-                    </Button>
+                    <p className="text-sm text-gray-500">We currently offer pickup orders only</p>
                   </div>
                 </CardContent>
               </Card>
@@ -311,71 +303,7 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-
-              {/* Delivery Address */}
-              {orderType === "delivery" && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Delivery Address</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Street Address *</label>
-                        <Input
-                          name="address"
-                          placeholder="123 Main Street"
-                          value={formData.address}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">City *</label>
-                          <Input
-                            name="city"
-                            placeholder="New York"
-                            value={formData.city}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">State *</label>
-                          <Input
-                            name="state"
-                            placeholder="NY"
-                            value={formData.state}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">ZIP Code *</label>
-                          <Input
-                            name="zipCode"
-                            placeholder="10001"
-                            value={formData.zipCode}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium mb-2">Delivery Instructions</label>
-                        <Textarea
-                          name="deliveryInstructions"
-                          placeholder="Apartment number, gate code, etc."
-                          value={formData.deliveryInstructions}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              </Card>              {/* Delivery Address section removed - pickup only */}
 
               {/* Pickup Time */}
               {orderType === "pickup" && (
@@ -411,9 +339,7 @@ export default function CheckoutPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )}
-
-              {/* Payment Method */}
+              )}              {/* Payment Method - Cash on Pickup Only */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -423,82 +349,27 @@ export default function CheckoutPage() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                       <Button
                         type="button"
-                        variant={paymentMethod === "card" ? "default" : "outline"}
-                        onClick={() => setPaymentMethod("card")}
-                        className={paymentMethod === "card" ? "bg-orange-600 hover:bg-orange-700" : ""}
+                        variant="default"
+                        className="bg-orange-600 hover:bg-orange-700"
+                        disabled
                       >
-                        Credit Card
+                        Cash on Pickup
                       </Button>
-                      <Button
-                        type="button"
-                        variant={paymentMethod === "cash" ? "default" : "outline"}
-                        onClick={() => setPaymentMethod("cash")}
-                        className={paymentMethod === "cash" ? "bg-orange-600 hover:bg-orange-700" : ""}
-                      >
-                        Cash on {orderType === "delivery" ? "Delivery" : "Pickup"}
-                      </Button>
+                      <p className="text-sm text-gray-500">We currently accept cash payment on pickup only</p>
                     </div>
-
-                    {paymentMethod === "card" && (
-                      <div className="space-y-4 pt-4 border-t">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Card Number *</label>
-                          <Input
-                            name="cardNumber"
-                            placeholder="1234 5678 9012 3456"
-                            value={formData.cardNumber}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium mb-2">Expiry Date *</label>
-                            <Input
-                              name="expiryDate"
-                              placeholder="MM/YY"
-                              value={formData.expiryDate}
-                              onChange={handleInputChange}
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium mb-2">CVV *</label>
-                            <Input
-                              name="cvv"
-                              placeholder="123"
-                              value={formData.cvv}
-                              onChange={handleInputChange}
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium mb-2">Cardholder Name *</label>
-                          <Input
-                            name="cardholderName"
-                            placeholder="John Doe"
-                            value={formData.cardholderName}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
+            {/* Order Summary */}            <div className="lg:col-span-1">
               <Card className="sticky top-4">
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>
-                  <CardDescription>{cartState.itemCount} items</CardDescription>
+                  <p className="text-sm text-gray-500">{cartState.itemCount} items</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -516,7 +387,7 @@ export default function CheckoutPage() {
                           <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                         </div>
                         <p className="text-sm font-medium">
-                          <Price value={item.price * item.quantity} />
+                          <Price amount={item.price * item.quantity} />
                         </p>
                       </div>
                     ))}
@@ -524,17 +395,10 @@ export default function CheckoutPage() {
 
                   <Separator />
 
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                  <div className="space-y-2">                    <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
                       <span>{formatPrice(cartState.total, currency)}</span>
                     </div>
-                    {orderType === "delivery" && (
-                      <div className="flex justify-between text-sm">
-                        <span>Delivery Fee</span>
-                        <span>{formatPrice(deliveryFee, currency)}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between text-sm">
                       <span>Tax</span>
                       <span>{formatPrice(tax, currency)}</span>
@@ -560,10 +424,8 @@ export default function CheckoutPage() {
                     ) : (
                       "Place Order"
                     )}
-                  </Button>
-
-                  <div className="text-xs text-gray-500 text-center">
-                    Estimated {orderType === "delivery" ? "delivery" : "pickup"} time: 25-35 minutes
+                  </Button>                  <div className="text-xs text-gray-500 text-center">
+                    Estimated pickup time: 25-35 minutes
                   </div>
                 </CardContent>
               </Card>

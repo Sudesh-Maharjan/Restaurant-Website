@@ -5,17 +5,23 @@ import { formatPrice } from '@/lib/currency';
 import { useAppSelector } from '@/redux/hooks';
 
 interface PriceProps {
-  value: number;
+  amount?: number;
+  currency?: string;
   className?: string;
 }
 
-export function Price({ value, className = '' }: PriceProps) {
+export function Price({ amount, currency, className = '' }: PriceProps) {
   const { settings } = useAppSelector((state) => state.settings);
-  const currency = settings?.currency || 'USD';
+  const currencyToUse = currency || settings?.currency || 'USD';
+  
+  // Handle undefined or null amounts
+  if (amount === undefined || amount === null) {
+    return <span className={className}>$0.00</span>;
+  }
   
   return (
     <span className={className}>
-      {formatPrice(value, currency)}
+      {formatPrice(amount, currencyToUse)}
     </span>
   );
 }

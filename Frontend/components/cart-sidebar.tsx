@@ -64,7 +64,7 @@ export function CartSidebar() {
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-sm truncate">{item.name}</h4>
                       <p className="text-orange-600 font-semibold">
-                        <Price value={item.price} />
+                        <Price amount={item.price} />
                       </p>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -105,7 +105,7 @@ export function CartSidebar() {
               <div className="flex justify-between items-center text-lg font-semibold">
                 <span>Total:</span>
                 <span className="text-orange-600">
-                  <Price value={total} />
+                  <Price amount={total} />
                 </span>
               </div>
               <Link href="/checkout" className="w-full">

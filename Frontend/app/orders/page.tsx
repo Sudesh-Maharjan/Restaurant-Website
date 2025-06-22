@@ -236,8 +236,7 @@ export default function OrdersPage() {
                           <BanknoteIcon className="h-4 w-4 mr-2" />
                           Total
                         </CardTitle>
-                      </CardHeader>
-                      <CardContent>
+                      </CardHeader>                      <CardContent>
                         <div className="font-medium">
                           <Price 
                             amount={selectedOrder.total} 
@@ -278,15 +277,13 @@ export default function OrdersPage() {
                                 )}
                               </div>
                               <div className="flex-1">
-                                <h4 className="font-medium">{item.name}</h4>
-                                <div className="text-sm text-gray-500">
+                                <h4 className="font-medium">{item.name}</h4>                                <div className="text-sm text-gray-500">
                                   <Price 
                                     amount={item.price} 
                                     currency={settings?.currency || 'USD'} 
                                   /> x {item.quantity}
                                 </div>
-                              </div>
-                              <div className="font-medium">
+                              </div>                              <div className="font-medium">
                                 <Price 
                                   amount={item.price * item.quantity} 
                                   currency={settings?.currency || 'USD'} 
@@ -297,8 +294,7 @@ export default function OrdersPage() {
                         </div>
                       </CardContent>
                       <CardFooter className="flex justify-between bg-gray-50 px-6 py-3">
-                        <span className="font-medium">Total</span>
-                        <span className="font-medium">
+                        <span className="font-medium">Total</span>                        <span className="font-medium">
                           <Price 
                             amount={selectedOrder.total} 
                             currency={settings?.currency || 'USD'} 
@@ -356,6 +352,14 @@ export default function OrdersPage() {
   )
 }
 
+interface OrderItem {
+  product: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string;
+}
+
 interface Order {
   _id: string;
   customer: {
@@ -411,8 +415,7 @@ const OrderCard = ({ order, onViewDetails }: { order: any, onViewDetails: () => 
       <CardContent className="px-6 pb-2">
         <div className="flex items-center gap-2 mb-3">
           <div className="flex-1">
-            {order.items.slice(0, 3).map((item: any, idx: number) => (
-              <div key={idx} className="text-sm py-1 flex justify-between">
+            {order.items.slice(0, 3).map((item: any, idx: number) => (              <div key={idx} className="text-sm py-1 flex justify-between">
                 <span className="text-gray-700">{item.quantity}x {item.name}</span>
                 <span className="font-medium">
                   <Price amount={item.price * item.quantity} currency={settings?.currency || 'USD'} />
@@ -429,8 +432,7 @@ const OrderCard = ({ order, onViewDetails }: { order: any, onViewDetails: () => 
         <Separator className="my-3" />
         <div className="flex justify-between items-center">
           <div>
-            <div className="text-sm text-gray-500">Total</div>
-            <div className="font-medium">
+            <div className="text-sm text-gray-500">Total</div>            <div className="font-medium">
               <Price amount={order.total} currency={settings?.currency || 'USD'} />
             </div>
           </div>
