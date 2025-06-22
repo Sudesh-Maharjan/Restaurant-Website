@@ -163,7 +163,7 @@ export default function RestaurantLanding() {
         </section>
 
         {/* About Section */}
-        <section id="about" className="py-20 bg-gray-50 dark:bg-gray-900">
+        <section id="about" className="py-20 bg-gray-50 dark:bg-gray-900 px-4">
           <div className="flex justify-center">
             <div className="flex gap-10 xs:flex-col sm:flex-row items-center">        
                     <div className="">
