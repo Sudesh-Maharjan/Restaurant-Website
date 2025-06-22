@@ -155,11 +155,19 @@ const orderSlice = createSlice({
       if (state.order && state.order._id === updatedOrder._id) {
         state.order = updatedOrder;
       }
-    },
-    addOrderViaWebSocket: (state, action: PayloadAction<Order>) => {
+    },    addOrderViaWebSocket: (state, action: PayloadAction<Order>) => {
       // Add to orders array if not already present
       if (!state.orders.some(order => order._id === action.payload._id)) {
         state.orders = [action.payload, ...state.orders];
+      }
+    },
+    removeOrderViaWebSocket: (state, action: PayloadAction<string>) => {
+      // Remove from orders array
+      state.orders = state.orders.filter(order => order._id !== action.payload);
+      
+      // Clear selected order if it's the one that was deleted
+      if (state.order && state.order._id === action.payload) {
+        state.order = null;
       }
     }
   },
@@ -278,6 +286,7 @@ export const {
   clearOrderError, 
   clearSelectedOrder,
   updateOrderViaWebSocket,
-  addOrderViaWebSocket
+  addOrderViaWebSocket,
+  removeOrderViaWebSocket
 } = orderSlice.actions;
 export default orderSlice.reducer;

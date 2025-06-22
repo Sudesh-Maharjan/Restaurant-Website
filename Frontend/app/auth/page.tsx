@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
@@ -12,7 +12,8 @@ import { login, register } from "@/redux/slices/authSlice"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 
-export default function AuthPage() {
+// Create a client component that uses searchParams
+function AuthPageContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [userType, setUserType] = useState<"user" | "admin">("user")
   const [isLogin, setIsLogin] = useState(true)
@@ -20,7 +21,8 @@ export default function AuthPage() {
     name: "",
     email: "",
     password: "",
-  })  
+    phone: "",
+  })
   const searchParams = useSearchParams()
 
   const dispatch = useAppDispatch()
@@ -68,11 +70,11 @@ export default function AuthPage() {
           variant: "destructive"
         })
       }    } else {
-      try {
-        console.log('Signup data:', {
+      try {        console.log('Signup data:', {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          phone: formData.phone,
           role: userType
         });
         
@@ -80,6 +82,7 @@ export default function AuthPage() {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          phone: formData.phone,
           role: userType
         }));
         
@@ -116,7 +119,7 @@ export default function AuthPage() {
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2"> 
               <ArrowLeft className="h-5 w-5" />
             </Link>
           
@@ -260,9 +263,7 @@ export default function AuthPage() {
                           disabled={isLoading}
                           className="h-10 border-gray-300"
                         />
-                      </div>
-
-                      <div>
+                      </div>                      <div>
                         <label className="block text-sm font-medium mb-2">Email</label>
                         <Input 
                           type="email" 
@@ -270,6 +271,20 @@ export default function AuthPage() {
                           placeholder="your@email.com" 
                           required 
                           value={formData.email}
+                          onChange={handleChange}
+                          disabled={isLoading}
+                          className="h-10 border-gray-300"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Phone</label>
+                        <Input 
+                          type="tel" 
+                          name="phone"
+                          placeholder="Your phone number" 
+                          required 
+                          value={formData.phone}
                           onChange={handleChange}
                           disabled={isLoading}
                           className="h-10 border-gray-300"
@@ -323,12 +338,24 @@ export default function AuthPage() {
               {userType === "user" && (
                 <div className="mt-6 pt-4 border-t border-gray-100 text-center text-xs text-gray-500">
                   <p>Are you a restaurant owner? Select "Restaurant Admin" above to log in to your admin account.</p>
-                </div>
-              )}
+                </div>              )}
             </CardContent>
           </Card>
         </div>
       </div>
     </div>
+  )
+}
+
+// Wrap the client component in Suspense
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-12 w-12 text-orange-600 animate-spin" />
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
   )
 }

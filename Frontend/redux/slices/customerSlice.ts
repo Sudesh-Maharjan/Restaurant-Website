@@ -11,7 +11,7 @@ export interface Customer {
   totalOrders: number;
   totalSpent: number;
   joinedDate: string;
-  lastOrderDate: string;
+  lastOrderDate: string | null;
 }
 
 interface CustomersState {
@@ -29,9 +29,19 @@ export const getCustomers = createAsyncThunk(
   'customers/getCustomers',
   async (_, { rejectWithValue }) => {
     try {
+      console.log('Making API call to fetch customers...');
       const response = await api.get(API_URL);
+      console.log('API response:', response);
+      
+      if (!response.data || !response.data.data) {
+        console.error('Invalid API response format:', response.data);
+        return rejectWithValue('Invalid API response format');
+      }
+      
+      console.log('Customers data:', response.data.data);
       return response.data.data;
     } catch (error: any) {
+      console.error('API error:', error);
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch customers');
     }
   }
@@ -111,10 +121,10 @@ const customerSlice = createSlice({
       .addCase(getCustomers.pending, (state) => {
         state.isLoading = true;
         state.error = null;
-      })
-      .addCase(getCustomers.fulfilled, (state, action) => {
+      })      .addCase(getCustomers.fulfilled, (state, action) => {
+        console.log('getCustomers.fulfilled with payload:', action.payload);
         state.isLoading = false;
-        state.customers = action.payload;
+        state.customers = action.payload || [];
       })
       .addCase(getCustomers.rejected, (state, action) => {
         state.isLoading = false;

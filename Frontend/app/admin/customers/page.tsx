@@ -21,6 +21,7 @@ import { getCustomers, getCustomer, createCustomer, updateCustomer, deleteCustom
 import { getOrders } from "@/redux/slices/orderSlice"
 import { useToast } from "@/hooks/use-toast"
 import { formatPrice } from "@/lib/currency"
+import fetchCustomers from "@/utils/debug-customers"
 import { 
   Form, 
   FormControl, 
@@ -53,10 +54,27 @@ const customerFormSchema = z.object({
 
 type CustomerFormValues = z.infer<typeof customerFormSchema>
 
+// Helper function to format dates
+const formatDate = (dateString: string | Date | null) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat('en-US', { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  }).format(date);
+};
+
 export default function AdminCustomers() {
   const dispatch = useAppDispatch()
-  const { customers, isLoading, error } = useAppSelector((state) => state.customers)
-  const { orders } = useAppSelector((state) => state.orders)
+  const { customers, isLoading, error } = useAppSelector((state) => {
+    console.log('Current customers state:', state.customers);
+    return state.customers;
+  })
+  const { orders } = useAppSelector((state) => {
+    console.log('Current orders state:', state.orders);
+    return state.orders;
+  })
   const settings = useAppSelector((state) => state.settings.settings)
   const currency = settings?.currency || 'USD'
   const { toast } = useToast()
@@ -78,9 +96,22 @@ export default function AdminCustomers() {
       address: "",
     },
   })
-
   useEffect(() => {
+    console.log('Fetching customers...');
+    // Call the regular Redux action
     dispatch(getCustomers())
+      .then((result) => {
+        console.log('Redux getCustomers result:', result);
+      })
+      .catch((error) => {
+        console.error('Redux getCustomers error:', error);
+      });
+    
+    // Also try direct API call for debugging
+    fetchCustomers().then(customers => {
+      console.log('Direct API call customers:', customers);
+    });
+    
     dispatch(getOrders())
   }, [dispatch])
 
@@ -108,16 +139,29 @@ export default function AdminCustomers() {
   const filteredCustomers = customers.filter((customer) => {
     const searchLower = searchTerm.toLowerCase()
     return (
-      customer.name.toLowerCase().includes(searchLower) ||
-      customer.email.toLowerCase().includes(searchLower) ||
+      customer.name.toLowerCase().includes(searchLower) ||      customer.email.toLowerCase().includes(searchLower) ||
       (customer.phone && customer.phone.toLowerCase().includes(searchLower))
     )
   })
+  
   const getCustomerOrders = (customerId: string) => {
     return orders.filter((order) => order.customer?._id === customerId);
   }
 
-  const calculateCustomerStats = (customerId: string) => {
+  // This function now uses the stats from database but falls back to calculated stats if needed
+  const calculateCustomerStats = (customerId: string, customer: Customer) => {
+    // First try to use the stored values from the database
+    if (typeof customer.totalOrders === 'number' && 
+        typeof customer.totalSpent === 'number' && 
+        customer.totalOrders >= 0 && customer.totalSpent >= 0) {
+      return {
+        totalOrders: customer.totalOrders,
+        totalSpent: customer.totalSpent,
+        lastOrderDate: customer.lastOrderDate ? new Date(customer.lastOrderDate) : null
+      };
+    }
+    
+    // Fall back to calculating from orders if database values are not available
     const customerOrders = getCustomerOrders(customerId);
     const totalOrders = customerOrders.length;
     const totalSpent = customerOrders.reduce((sum, order) => sum + order.total, 0);
@@ -225,11 +269,6 @@ export default function AdminCustomers() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString();
-  }
-
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -258,10 +297,9 @@ export default function AdminCustomers() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Gold Members</p>
+              <div>                <p className="text-sm font-medium text-gray-600">Gold Members</p>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {customers.filter((c) => c.totalSpent >= 500).length}
+                  {customers.filter((c) => (c.totalSpent || 0) >= 500).length}
                 </p>
               </div>
               <div className="h-8 w-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -274,13 +312,12 @@ export default function AdminCustomers() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Avg. Order Value</p>
+              <div>                <p className="text-sm font-medium text-gray-600">Avg. Order Value</p>
                 <p className="text-2xl font-bold text-green-600">
-                  {customers.length > 0 && customers.reduce((sum, c) => sum + c.totalOrders, 0) > 0
+                  {customers.length > 0 && customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0) > 0
                     ? formatPrice(
-                        customers.reduce((sum, c) => sum + c.totalSpent, 0) /
-                        customers.reduce((sum, c) => sum + c.totalOrders, 0),
+                        customers.reduce((sum, c) => sum + (c.totalSpent || 0), 0) /
+                        customers.reduce((sum, c) => sum + (c.totalOrders || 0), 0),
                         currency
                       )
                     : formatPrice(0, currency)}
@@ -349,9 +386,8 @@ export default function AdminCustomers() {
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {filteredCustomers.map((customer) => {
-                  const stats = calculateCustomerStats(customer._id);
+              <TableBody>                {filteredCustomers.map((customer) => {
+                  const stats = calculateCustomerStats(customer._id, customer);
                   const customerTier = getCustomerTier(stats.totalSpent);
                   return (
                     <TableRow key={customer._id}>
@@ -442,9 +478,8 @@ export default function AdminCustomers() {
                       <strong>Address:</strong> {selectedCustomer.address || 'No address provided'}
                     </p>
                   </div>
-                  <div>                    <h4 className="font-semibold mb-2">Customer Stats</h4>
-                    {(() => {
-                      const stats = calculateCustomerStats(selectedCustomer._id);
+                  <div>                    <h4 className="font-semibold mb-2">Customer Stats</h4>                    {(() => {
+                      const stats = calculateCustomerStats(selectedCustomer._id, selectedCustomer);
                       const customerTier = getCustomerTier(stats.totalSpent);
                       return (
                         <>

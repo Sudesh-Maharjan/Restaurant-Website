@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import webSocketService from '@/services/websocket';
-import { addOrderViaWebSocket, updateOrderViaWebSocket } from '@/redux/slices/orderSlice';
+import { addOrderViaWebSocket, updateOrderViaWebSocket, removeOrderViaWebSocket } from '@/redux/slices/orderSlice';
 import { addNotification, fetchNotifications } from '@/redux/slices/notificationSlice';
 import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -111,12 +111,58 @@ export default function WebSocketProvider({ children }: WebSocketProviderProps) 
         
         if (data.order.status === 'cancelled') {
           toastVariant = 'destructive';
-        }
-        
-        toast({
+        }          toast({
           title: notificationTitle,
-          description: notificationMessage,
-          variant: toastVariant,
+          description: notificationMessage,          variant: toastVariant,
+        });
+      } else if (data.event === 'paymentUpdated') {
+        // Handle payment status update
+        dispatch(updateOrderViaWebSocket(data.order));
+        
+        // Create notification for payment update
+        const notificationId = uuidv4();
+        const notification = {
+          id: notificationId,
+          title: 'Payment Status Updated',
+          message: `Order #${data.order.orderNumber || data.order._id.substr(-6)} is now ${data.order.paid ? 'paid' : 'unpaid'}`,
+          type: 'status_update' as const,
+          isRead: false,
+          orderId: data.order._id,
+          timestamp: new Date().toISOString(),
+        };
+        
+        dispatch(addNotification(notification));
+        
+        // Show toast notification
+        toast({
+          title: 'Payment Status Updated',
+          description: `Order #${data.order.orderNumber || data.order._id.substr(-6)} is now ${data.order.paid ? 'paid' : 'unpaid'}`,
+          variant: 'default',
+        });
+      } else if (data.event === 'deleted') {
+        // Handle order deletion
+        dispatch(removeOrderViaWebSocket(data.order._id));
+        
+        // Create notification for deleted order
+        const notificationId = uuidv4();
+        const notification = {
+          id: notificationId,
+          title: 'Order Deleted',
+          message: `Order #${data.order.orderNumber || data.order._id.substr(-6)} has been deleted`,
+          type: 'status_update' as const,
+          status: 'cancelled', // Use cancelled status for styling
+          isRead: false,
+          orderId: data.order._id,
+          timestamp: new Date().toISOString(),
+        };
+        
+        dispatch(addNotification(notification));
+        
+        // Show toast notification
+        toast({
+          title: 'Order Deleted',
+          description: `Order #${data.order.orderNumber || data.order._id.substr(-6)} has been deleted`,
+          variant: 'destructive',
         });
       }
     };

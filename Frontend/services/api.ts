@@ -17,6 +17,7 @@ api.interceptors.request.use(
     // Only access localStorage on the client side
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('token');
+      console.log('Token for API request:', token ? token.substring(0, 20) + '...' : 'No token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
