@@ -9,9 +9,9 @@ import menuReducer from './slices/menuSlice'
 import settingsReducer from './slices/settingsSlice'
 import reservationReducer from './slices/reservationSlice'
 import notificationReducer from './slices/notificationSlice'
+import contactReducer from './slices/contactSlice'
 
-export const store = configureStore({
-  reducer: {
+export const store = configureStore({  reducer: {
     auth: authReducer,
     product: productReducer,
     products: productsReducer,
@@ -22,6 +22,7 @@ export const store = configureStore({
     settings: settingsReducer,
     reservations: reservationReducer,
     notifications: notificationReducer,
+    contact: contactReducer,
   },
 })
 
